@@ -4,46 +4,25 @@ P17003_1002	Pc.Ra.C2	GTAGAGAG	GCGTAAGA	Root	P_chilensis	Control	La_Serena	11,5	1
 P17003_1003	Pc.Ra.C3	CAGCCTCG	CTCTCTAT	Root	P_chilensis	Control	La_Serena	16	2,3																				
 P17003_1004	Pc.Ra.C4	CAGCCTCG	TATCCTCT	Root	P_chilensis	Control	La_Serena	14	1,6																				
 P17003_1005	Pc.Ra.C5	CAGCCTCG	GTAAGGAG	Root	P_chilensis	Control	La_Serena	13	1,8																				
-P17003_1006	Pc.Ra.E1	CAGCCTCG	ACTGCATA	Root	P_chilensis	Stress	La_Serena	10,5																					
-P17003_1007	Pc.Ra.E2	CAGCCTCG	AAGGAGTA	Root	P_chilensis	Stress	La_Serena	11																					
-P17003_1008	Pc.Ra.E3	CAGCCTCG	CTAAGCCT	Root	P_chilensis	Stress	La_Serena	10																					
-P17003_1009	Pc.Ra.E4	CAGCCTCG	CGTCTAAT	Root	P_chilensis	Stress	La_Serena	7																					
-P17003_1010	Pc.Ra.E5	CAGCCTCG	TCTCTCCG	Root	P_chilensis	Stress	La_Serena	8																					
 P17003_1011	Pc.Re.C1	CAGCCTCG	TCGACTAG	Root	P_chilensis	Control	Vicuna	18	1,9																				
 P17003_1012	Pc.Re.C2	CAGCCTCG	TTCTAGCT	Root	P_chilensis	Control	Vicuna	22	1,8																				
 P17003_1013	Pc.Re.C3	CAGCCTCG	CCTAGAGT	Root	P_chilensis	Control	Vicuna	16,5	0,5																				
 P17003_1014	Pc.Re.C4	CAGCCTCG	GCGTAAGA	Root	P_chilensis	Control	Vicuna	19	1,5																				
 P17003_1015	Pc.Re.C5	TGCCTCTT	CTCTCTAT	Root	P_chilensis	Control	Vicuna	25	1,8																				
-P17003_1016	Pc.Re.E5	TGCCTCTT	TATCCTCT	Root	P_chilensis	Stress	Vicuna	13																					
 P17003_1017	Pc.Rs.C1	GTAGAGAG	CTCTCTAT	Root	P_chilensis	Control	Los_Angeles	23	1,5																				
 P17003_1018	Pc.Rs.C2	GTAGAGAG	TATCCTCT	Root	P_chilensis	Control	Los_Angeles	16,5	1,7																				
 P17003_1019	Pc.Rs.C3	GTAGAGAG	GTAAGGAG	Root	P_chilensis	Control	Los_Angeles	22,5	0,3																				
 P17003_1020	Pc.Rs.C4	GTAGAGAG	ACTGCATA	Root	P_chilensis	Control	Los_Angeles	19,5	1,4																				
 P17003_1021	Pc.Rs.C5	GTAGAGAG	AAGGAGTA	Root	P_chilensis	Control	Los_Angeles	19	0,8																				
-P17003_1022	Pc.Rs.E1	GTAGAGAG	CTAAGCCT	Root	P_chilensis	Stress	Los_Angeles	16																					
-P17003_1023	Pc.Rs.E2	GTAGAGAG	CGTCTAAT	Root	P_chilensis	Stress	Los_Angeles	13,5																					
-P17003_1024	Pc.Rs.E3	GTAGAGAG	TCTCTCCG	Root	P_chilensis	Stress	Los_Angeles	17																					
-P17003_1025	Pc.Rs.E4	GTAGAGAG	TCGACTAG	Root	P_chilensis	Stress	Los_Angeles	17,5																					
-P17003_1026	Pc.Rs.E5	GTAGAGAG	TTCTAGCT	Root	P_chilensis	Stress	Los_Angeles	14																					
 P17003_1027	Pc.Sa.C1	TCGCCTTA	CCTAGAGT	Soil	P_chilensis	Control	La_Serena			0,37	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1028	Pc.Sa.C2	TCGCCTTA	GCGTAAGA	Soil	P_chilensis	Control	La_Serena			0,19	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1029	Pc.Sa.C3	CTAGTACG	CTCTCTAT	Soil	P_chilensis	Control	La_Serena			0,23	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1030	Pc.Sa.C4	CTAGTACG	TATCCTCT	Soil	P_chilensis	Control	La_Serena			0,2	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1031	Pc.Sa.C5	CTAGTACG	GTAAGGAG	Soil	P_chilensis	Control	La_Serena			0,19	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
-P17003_1032	Pc.Sa.E1	CTAGTACG	ACTGCATA	Soil	P_chilensis	Stress	La_Serena																						
-P17003_1033	Pc.Sa.E2	CTAGTACG	AAGGAGTA	Soil	P_chilensis	Stress	La_Serena																						
-P17003_1034	Pc.Sa.E3	CTAGTACG	CTAAGCCT	Soil	P_chilensis	Stress	La_Serena																						
-P17003_1035	Pc.Sa.E4	CTAGTACG	CGTCTAAT	Soil	P_chilensis	Stress	La_Serena																						
-P17003_1036	Pc.Sa.E5	CTAGTACG	TCTCTCCG	Soil	P_chilensis	Stress	La_Serena																						
 P17003_1037	Pc.Se.C1	CTAGTACG	TCGACTAG	Soil	P_chilensis	Control	Vicuna			0,28	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
 P17003_1038	Pc.Se.C2	CTAGTACG	TTCTAGCT	Soil	P_chilensis	Control	Vicuna			0,3	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
 P17003_1039	Pc.Se.C3	CTAGTACG	CCTAGAGT	Soil	P_chilensis	Control	Vicuna			0,3	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
 P17003_1040	Pc.Se.C4	CTAGTACG	GCGTAAGA	Soil	P_chilensis	Control	Vicuna			0,24	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
-P17003_1041	Pc.Se.E1	TTCTGCCT	CTCTCTAT	Soil	P_chilensis	Stress	Vicuna																						
-P17003_1042	Pc.Se.E2	TTCTGCCT	TATCCTCT	Soil	P_chilensis	Stress	Vicuna																						
-P17003_1043	Pc.Se.E3	TTCTGCCT	GTAAGGAG	Soil	P_chilensis	Stress	Vicuna																						
-P17003_1044	Pc.Se.E4	TTCTGCCT	ACTGCATA	Soil	P_chilensis	Stress	Vicuna																						
-P17003_1045	Pc.Se.E5	TTCTGCCT	AAGGAGTA	Soil	P_chilensis	Stress	Vicuna																						
 P17003_1046	Pc.Sn.C1	TTCTGCCT	CTAAGCCT	Soil	P_chilensis	Control	Pozo_Almonte			0,23	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
 P17003_1047	Pc.Sn.C2	TTCTGCCT	CGTCTAAT	Soil	P_chilensis	Control	Pozo_Almonte			0,23	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
 P17003_1048	Pc.Sn.C3	TTCTGCCT	TCTCTCCG	Soil	P_chilensis	Control	Pozo_Almonte			0,18	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
@@ -54,55 +33,29 @@ P17003_1052	Pc.Ss.C2	TCGCCTTA	TATCCTCT	Soil	P_chilensis	Control	Los_Angeles			0,
 P17003_1053	Pc.Ss.C3	TCGCCTTA	GTAAGGAG	Soil	P_chilensis	Control	Los_Angeles			0,56	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
 P17003_1054	Pc.Ss.C4	TCGCCTTA	ACTGCATA	Soil	P_chilensis	Control	Los_Angeles			0,74	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
 P17003_1055	Pc.Ss.C5	TCGCCTTA	AAGGAGTA	Soil	P_chilensis	Control	Los_Angeles			0,6	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
-P17003_1056	Pc.Ss.E1	TCGCCTTA	CTAAGCCT	Soil	P_chilensis	Stress	Los_Angeles																						
-P17003_1057	Pc.Ss.E2	TCGCCTTA	CGTCTAAT	Soil	P_chilensis	Stress	Los_Angeles																						
-P17003_1058	Pc.Ss.E3	TCGCCTTA	TCTCTCCG	Soil	P_chilensis	Stress	Los_Angeles																						
-P17003_1059	Pc.Ss.E4	TCGCCTTA	TCGACTAG	Soil	P_chilensis	Stress	Los_Angeles																						
-P17003_1060	Pc.Ss.E5	TCGCCTTA	TTCTAGCT	Soil	P_chilensis	Stress	Los_Angeles																						
 P17003_1061	Pt.Ra.C1	TCCTCTAC	CCTAGAGT	Root	P_tamarugo	Control	La_Serena	20	2,3																				
 P17003_1062	Pt.Ra.C2	TCCTCTAC	GCGTAAGA	Root	P_tamarugo	Control	La_Serena	17,5	2,6																				
 P17003_1063	Pt.Ra.C3	TCATGAGC	CTCTCTAT	Root	P_tamarugo	Control	La_Serena	17,5	1,9																				
 P17003_1064	Pt.Ra.C4	TCATGAGC	TATCCTCT	Root	P_tamarugo	Control	La_Serena	17	21																				
 P17003_1065	Pt.Ra.C5	TCATGAGC	GTAAGGAG	Root	P_tamarugo	Control	La_Serena	21,5	2,2																				
-P17003_1066	Pt.Ra.E1	TCATGAGC	ACTGCATA	Root	P_tamarugo	Stress	La_Serena	12																					
-P17003_1067	Pt.Ra.E2	TCATGAGC	AAGGAGTA	Root	P_tamarugo	Stress	La_Serena	9,5																					
-P17003_1068	Pt.Ra.E3	TCATGAGC	CTAAGCCT	Root	P_tamarugo	Stress	La_Serena	13																					
-P17003_1069	Pt.Ra.E4	TCATGAGC	CGTCTAAT	Root	P_tamarugo	Stress	La_Serena	12																					
-P17003_1070	Pt.Ra.E5	TCATGAGC	TCTCTCCG	Root	P_tamarugo	Stress	La_Serena	15																					
 P17003_1071	Pt.Re.C1	TCATGAGC	TCGACTAG	Root	P_tamarugo	Control	Vicuna	20	2,3																				
 P17003_1072	Pt.Re.C2	TCATGAGC	TTCTAGCT	Root	P_tamarugo	Control	Vicuna	17,5	2,6																				
 P17003_1073	Pt.Re.C3	TCATGAGC	CCTAGAGT	Root	P_tamarugo	Control	Vicuna	17,5	1,9																				
 P17003_1074	Pt.Re.C4	TCATGAGC	GCGTAAGA	Root	P_tamarugo	Control	Vicuna	17	21																				
 P17003_1075	Pt.Re.C5	TGCCTCTT	GTAAGGAG	Root	P_tamarugo	Control	Vicuna	21,5	2,2																				
-P17003_1076	Pt.Re.E1	TGCCTCTT	ACTGCATA	Root	P_tamarugo	Stress	Vicuna	12																					
 P17003_1077	Pt.Rs.C1	TCCTCTAC	CTCTCTAT	Root	P_tamarugo	Control	Los_Angeles	18,5	1,3																				
 P17003_1078	Pt.Rs.C2	TCCTCTAC	TATCCTCT	Root	P_tamarugo	Control	Los_Angeles	19	1,1																				
 P17003_1079	Pt.Rs.C3	TCCTCTAC	GTAAGGAG	Root	P_tamarugo	Control	Los_Angeles	17,5	1,2																				
 P17003_1080	Pt.Rs.C4	TCCTCTAC	ACTGCATA	Root	P_tamarugo	Control	Los_Angeles	17	1,8																				
 P17003_1081	Pt.Rs.C5	TCCTCTAC	AAGGAGTA	Root	P_tamarugo	Control	Los_Angeles	18	1,7																				
-P17003_1082	Pt.Rs.E1	TCCTCTAC	CTAAGCCT	Root	P_tamarugo	Stress	Los_Angeles	13,5																					
-P17003_1083	Pt.Rs.E2	TCCTCTAC	CGTCTAAT	Root	P_tamarugo	Stress	Los_Angeles	16																					
-P17003_1084	Pt.Rs.E3	TCCTCTAC	TCTCTCCG	Root	P_tamarugo	Stress	Los_Angeles	12																					
-P17003_1085	Pt.Rs.E4	TCCTCTAC	TCGACTAG	Root	P_tamarugo	Stress	Los_Angeles	13																					
-P17003_1086	Pt.Rs.E5	TCCTCTAC	TTCTAGCT	Root	P_tamarugo	Stress	Los_Angeles	15																					
 P17003_1087	Pt.Sa.C1	GCTCAGGA	CCTAGAGT	Soil	P_tamarugo	Control	La_Serena			0,37	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1088	Pt.Sa.C2	GCTCAGGA	GCGTAAGA	Soil	P_tamarugo	Control	La_Serena			0,19	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1089	Pt.Sa.C3	AGGAGTCC	CTCTCTAT	Soil	P_tamarugo	Control	La_Serena			0,23	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1090	Pt.Sa.C4	AGGAGTCC	TATCCTCT	Soil	P_tamarugo	Control	La_Serena			0,2	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
 P17003_1091	Pt.Sa.C5	AGGAGTCC	GTAAGGAG	Soil	P_tamarugo	Control	La_Serena			0,19	77666,7	0,05	911,17	25,23	0,08	153,17	0,03	28,02	17,17	919,4	45,73	45,73	1,15	123,67	12,47	1,5	0,86	8,02	8,3
-P17003_1092	Pt.Sa.E1	AGGAGTCC	ACTGCATA	Soil	P_tamarugo	Stress	La_Serena																						
-P17003_1093	Pt.Sa.E2	AGGAGTCC	AAGGAGTA	Soil	P_tamarugo	Stress	La_Serena																						
-P17003_1094	Pt.Sa.E3	AGGAGTCC	CTAAGCCT	Soil	P_tamarugo	Stress	La_Serena																						
-P17003_1095	Pt.Sa.E4	AGGAGTCC	CGTCTAAT	Soil	P_tamarugo	Stress	La_Serena																						
-P17003_1096	Pt.Sa.E5	AGGAGTCC	TCTCTCCG	Soil	P_tamarugo	Stress	La_Serena																						
 P17003_1097	Pt.Se.C1	AGGAGTCC	TCGACTAG	Soil	P_tamarugo	Control	Vicuna			0,28	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
 P17003_1098	Pt.Se.C2	AGGAGTCC	TTCTAGCT	Soil	P_tamarugo	Control	Vicuna			0,3	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
 P17003_1099	Pt.Se.C3	AGGAGTCC	CCTAGAGT	Soil	P_tamarugo	Control	Vicuna			0,3	339666,7	4,7	350	3590	9,81	450	0,37	507	3,89	129	152,5	0,018	0,972	1,79	75,9	1,45	4,39	8,196	9,1
-P17003_1100	Pt.Se.E1	AGGAGTCC	GCGTAAGA	Soil	P_tamarugo	Stress	Vicuna																						
-P17003_1101	Pt.Se.E2	CATGCCTA	CTCTCTAT	Soil	P_tamarugo	Stress	Vicuna																						
-P17003_1102	Pt.Se.E3	CATGCCTA	TATCCTCT	Soil	P_tamarugo	Stress	Vicuna																						
-P17003_1103	Pt.Se.E4	CATGCCTA	GTAAGGAG	Soil	P_tamarugo	Stress	Vicuna																						
-P17003_1104	Pt.Se.E5	CATGCCTA	ACTGCATA	Soil	P_tamarugo	Stress	Vicuna																						
 P17003_1105	Pt.Sn.C1	CATGCCTA	AAGGAGTA	Soil	P_tamarugo	Control	Pozo_Almonte			0,23	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
 P17003_1106	Pt.Sn.C2	CATGCCTA	CTAAGCCT	Soil	P_tamarugo	Control	Pozo_Almonte			0,23	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
 P17003_1107	Pt.Sn.C3	CATGCCTA	CGTCTAAT	Soil	P_tamarugo	Control	Pozo_Almonte			0,18	22000	11,2	22404	3936	312,5	12436	0,032	367	117	24343	1684,7	55,8	1,6	12,31	107,6	4,7	1,44	5,273	88,6
@@ -113,9 +66,4 @@ P17003_1111	Pt.Ss.C2	GCTCAGGA	TATCCTCT	Soil	P_tamarugo	Control	Los_Angeles			0,5
 P17003_1112	Pt.Ss.C3	GCTCAGGA	GTAAGGAG	Soil	P_tamarugo	Control	Los_Angeles			0,56	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
 P17003_1113	Pt.Ss.C4	GCTCAGGA	ACTGCATA	Soil	P_tamarugo	Control	Los_Angeles			0,74	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
 P17003_1114	Pt.Ss.C5	GCTCAGGA	AAGGAGTA	Soil	P_tamarugo	Control	Los_Angeles			0,6	111666,7	11,4	298	2653	1,054	191	0,0302	553	59	71	158,5	0,033	0,375	12,32	63,3	1,2	0,39	6,327	0,8
-P17003_1115	Pt.Ss.E1	GCTCAGGA	CTAAGCCT	Soil	P_tamarugo	Stress	Los_Angeles																						
-P17003_1116	Pt.Ss.E2	GCTCAGGA	CGTCTAAT	Soil	P_tamarugo	Stress	Los_Angeles																						
-P17003_1117	Pt.Ss.E3	GCTCAGGA	TCTCTCCG	Soil	P_tamarugo	Stress	Los_Angeles																						
-P17003_1118	Pt.Ss.E4	GCTCAGGA	TCGACTAG	Soil	P_tamarugo	Stress	Los_Angeles																						
-P17003_1119	Pt.Ss.E5	GCTCAGGA	TTCTAGCT	Soil	P_tamarugo	Stress	Los_Angeles																						
 P17003_1120	Water	CGCTCAGT	GCGTAAGA	Water	Water	Water	Water																						
