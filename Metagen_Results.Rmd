@@ -34,6 +34,7 @@ library(circlize) #colors for Heatmap function
 library(tidyr) #drop_na 
 library(rwantshue) #color generator
 library(RColorBrewer) #color palette
+library(gridExtra) #grid arrange
 ```
 
 
@@ -315,7 +316,7 @@ ord <- ordinate(subset_samples(phy_raref, Sample == "Soil"), method = "PCoA", di
 sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Sample, sep="-")
 
 plot1<- gg_ordiplot(ord$vectors, groups = sample_data(subset_samples(phy_norm, Sample == "Soil"))$Soil, hull = TRUE, 
-            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = T)
+            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = FALSE)
 
 ggplot(data=plot1$df_spiders) + 
   geom_point(aes(x=x, y=y,shape=Group, colour=Group), size = 5) +
@@ -333,24 +334,56 @@ ggplot(data=plot1$df_spiders) +
 ```
 
 ```{r echo= FALSE}
+phy_obj_F_Soil <- subset_samples(phy_obj_Fungi, Sample == "Soil")
+phy_obj_F_Soil <- subset_samples(phy_obj_F_Soil, Soil != "Pozo_Almonte")
+phy_norm_F_Soil <- subset_samples(phy_norm, Sample == "Soil")
+phy_norm_F_Soil <- subset_samples(phy_norm_F_Soil, Soil != "Pozo_Almonte")
+phy_raref_F_Soil <- subset_samples(phy_raref, Sample == "Soil")
+phy_raref_F_Soil <- subset_samples(phy_raref_F_Soil, Soil != "Pozo_Almonte")
+
 #Root
-ord <- ordinate(subset_samples(phy_raref, Sample == "Root"), method = "PCoA", distance = "bray", weighted=FALSE)
-sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Soil, sep="-")
+phy_obj_F_Root <- subset_samples(phy_obj_Fungi, Sample == "Root")
+phy_norm_F_Root <- subset_samples(phy_norm, Sample == "Root")
+phy_raref_F_Root <- subset_samples(phy_raref, Sample == "Root")
 
-plot1<- gg_ordiplot(ord$vectors, groups = sample_data(subset_samples(phy_norm, Sample == "Root"))$Specie_sample, hull = TRUE, 
-            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = T)
+sample_data(phy_obj_F_Root)[,"sample_site"] <- paste(sample_data(phy_obj_F_Root)$Sample, sample_data(phy_obj_F_Root)$Soil, sample_data(phy_obj_F_Root)$Specie, sep = "_")
 
-ggplot(data=plot1$df_spiders) + 
-  geom_point(aes(x=x, y=y,shape=Group, colour=Group), size = 5) +
-  geom_point(aes(x=cntr.x, y=cntr.y), size = 5, shape = 18) +
-  geom_label(aes(x=cntr.x, y=cntr.y, label=Group, color=Group)) +
-  scale_color_manual(values=c("gold", "darkorange", "darkgoldenrod3","gold", "darkorange", "darkgoldenrod3")) + scale_shape_manual(values = c(15,15,15,17,17,17)) +
+sample_data(phy_norm_F_Root)[,"sample_site"] <- paste(sample_data(phy_norm_F_Root)$Sample, sample_data(phy_norm_F_Root)$Soil, sample_data(phy_norm_F_Root)$Specie, sep = "_")
+
+sample_data(phy_raref_F_Root)[,"sample_site"] <- paste(sample_data(phy_raref_F_Root)$Sample, sample_data(phy_raref_F_Root)$Soil, sample_data(phy_raref_F_Root)$Specie, sep = "_")
+
+phy_obj <- merge_phyloseq(phy_obj_F_Soil,phy_obj_F_Root)
+
+phy_norm <- merge_phyloseq(phy_norm_F_Soil,phy_norm_F_Root)
+
+phy_raref <- merge_phyloseq(phy_raref_F_Soil,phy_raref_F_Root)
+
+ord <- ordinate(phy_raref, method = "PCoA", distance = "bray", weighted=FALSE)
+
+plot_ordination(phy_norm, ord, color = "Soil", shape = "sample_site") + geom_point(size=7) +
+  scale_color_manual(values=c("gold", "darkorange", "darkgoldenrod3")) + scale_shape_manual(values = c(24,25,24,25,24,25,19,19,19,19)) +
   theme_bw() + 
   theme(legend.position = "bottom", legend.box = "vertical", 
         text=element_text(size = 18),
         axis.text.x = element_text(size = 16, colour = "black"),
         axis.text.y = element_text(size = 16, colour = "black"),
         panel.border = element_rect(size = 2, fill = NA))
+
+plot1<- gg_ordiplot(ord$vectors, groups = sample_data(phy_norm)$sample_site, hull = TRUE, 
+            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = FALSE)
+
+#pdf("Manuscript/Plots/Fungal_beta_Both.pdf",height=10, width=10)
+ggplot(data=plot1$df_spiders) + 
+  geom_point(aes(x=x, y=y,shape=Group, colour=Group), size = 5) +
+  geom_point(aes(x=cntr.x, y=cntr.y), size = 5, shape = 18) +
+  scale_color_manual(values=c("gold","gold", "darkorange","darkorange", "darkgoldenrod3","darkgoldenrod3","gold", "darkorange", "darkgoldenrod3")) + scale_shape_manual(values = c(24,25,24,25,24,25,19,19,19,19)) +
+  theme_bw() + 
+  theme(legend.position = "bottom", legend.box = "vertical", 
+        text=element_text(size = 18),
+        axis.text.x = element_text(size = 16, colour = "black"),
+        axis.text.y = element_text(size = 16, colour = "black"),
+        panel.border = element_rect(size = 2, fill = NA))
+#dev.off()
 
 (sim <- with(sample_data(subset_samples(phy_norm, Sample == "Root")), simper(t(otu_table(subset_samples(phy_norm, Sample == "Root"))), Specie_sample)))
 #summary(sim)
@@ -373,18 +406,15 @@ adonis(t(otu_table(tmp)) ~ Specie * Sample * Soil, data = data.frame(sample_data
 ### Disimilarity Heatmap
 ``` {r echo= FALSE}
 # Preparing data
-phy_obj_Soils <- subset_samples(phy_obj_Fungi, Sample == "Soil")
 
-phy_norm_Soils <- transform_sample_counts(phy_obj_Soils,function(x) x/sum(x))
-
-taxonomy2 <- data.frame(paste(tax_table(phy_norm_Soils)[,1],tax_table(phy_norm_Soils)[,2],tax_table(phy_norm_Soils)[,3],tax_table(phy_norm_Soils)[,4],
-                  tax_table(phy_norm_Soils)[,5],tax_table(phy_norm_Soils)[,6],tax_table(phy_norm_Soils)[,7],sep = ";"))
-rownames(taxonomy2) <- rownames(tax_table(phy_norm_Soils))
+taxonomy2 <- data.frame(paste(tax_table(subset_samples(phy_norm, Sample == "Soil"))[,1],tax_table(subset_samples(phy_norm, Sample == "Soil"))[,2],tax_table(subset_samples(phy_norm, Sample == "Soil"))[,3],tax_table(subset_samples(phy_norm, Sample == "Soil"))[,4],
+                  tax_table(subset_samples(phy_norm, Sample == "Soil"))[,5],tax_table(subset_samples(phy_norm, Sample == "Soil"))[,6],tax_table(subset_samples(phy_norm, Sample == "Soil"))[,7],sep = ";"))
+rownames(taxonomy2) <- rownames(tax_table(subset_samples(phy_norm, Sample == "Soil")))
 colnames(taxonomy2) <- "taxonomy"
 taxonomy2[,"ASV"] <- rownames(taxonomy2)
 
 sim <- with(sample_data(subset_samples(phy_norm, Sample == "Soil")), simper(t(otu_table(subset_samples(phy_norm, Sample == "Soil"))), Soil))
-summary(sim)
+#summary(sim)
 
 df1 <- rownames(summary(sim)[[1]] %>% filter(cumsum < .7)) #LS_V
 df2 <- rownames(summary(sim)[[2]] %>% filter(cumsum < .7)) #LS_PA
@@ -411,7 +441,7 @@ ASV_list <- union(ASV_list,df4)
 ASV_list <- union(ASV_list,df5)
 ASV_list <- union(ASV_list,df6)
 
-phy_mrg <- merge_samples(phy_norm_Soils, group = "Soil", fun = "mean")
+phy_mrg <- merge_samples(subset_samples(phy_norm, Sample == "Soil"), group = "Soil", fun = "mean")
 
 phy_mrg <- prune_taxa(ASV_list, phy_mrg)
 
@@ -456,7 +486,7 @@ pheatmap(phy_mrg[,c(1:4)], breaks=mat_breaks, col=colors,
          angle_col = 45, cellwidth = 12,
          cluster_cols = FALSE, cluster_rows = FALSE, annotation_col = col_ann, 
          annotation_colors = pal, fontsize_col=8, fontsize_row=8,
-         main = "Most abundant fungal species", 
+         main = "Disimilarity fungal species", 
          labels_row = paste(phy_mrg$taxonomy,rownames(phy_mrg),sep = ",")
          , annotation_legend = FALSE
          , show_rownames = FALSE
@@ -468,6 +498,7 @@ pheatmap(phy_mrg[,c(1:4)], breaks=mat_breaks, col=colors,
 tmp <- prune_samples(!is.na(sample_data(phy_obj_Soils)$Specie), phy_obj_Soils) 
 adonis2(t(otu_table(tmp)) ~ Soil, data = data.frame(sample_data(phy_obj_Soils)))
 ```
+
 ```{r}
 pairwise.adonis2(t(otu_table(tmp))~Soil, data = data.frame(sample_data(tmp)))
 ```
@@ -507,11 +538,11 @@ phy_FR_LAPt <- subset_samples(phy_FR_LAPt, Specie == "P_tamarugo")
 ```
 
 ```{r}
-phy_norm_F_Soil <- subset_samples(phy_norm_Fungi, Sample == "Soil")
+phy_norm_F_Soil <- subset_samples(phy_norm, Sample == "Soil")
 
 phy_norm_FS_mrg <- merge_samples(phy_norm_F_Soil, "Soil", fun = mean)
 
-phy_norm_F_Root <- subset_samples(phy_norm_Fungi, Sample == "Root")
+phy_norm_F_Root <- subset_samples(phy_norm, Sample == "Root")
 
 sample_data(phy_norm_F_Root)[,"Soil_sp"] <- paste(sample_data(phy_norm_F_Root)$Soil, sample_data(phy_norm_F_Root)$Specie, sep = "_")
 
@@ -630,6 +661,81 @@ P_tam_V_lz <- P_tam_V_lz$Row.names
 
 P_chil_v_lz <- P_chil_v %>% filter(Delta < 0)
 P_chil_v_lz <- P_chil_v_lz$Row.names
+```
+
+###common recruitment
+```{r}
+common_V <- intersect(P_tam_V_hz, P_chil_v_hz)
+
+Root_Pc_V <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_V]
+
+Root_Pt_V <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_V]
+
+
+P_tam_v <- merge(Soil_Pt_V, Root_Pt_V, by= "row.names")
+rownames(P_tam_v) <- P_tam_v$Row.names
+P_tam_v[,"ASVs"] <- P_tam_v$Row.names
+P_tam_v$ASVs <- as.factor(P_tam_v$ASVs)
+P_tam_v[,"Delta"] <- P_tam_v$Vicuna_P_tamarugo-P_tam_v$Vicuna
+P_tam_v <- P_tam_v[,-1]
+
+P_tam_v <- merge(P_tam_v,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_tam_v, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Vicuña") +
+  scale_y_discrete(labels=paste(P_tam_v$Kingdom,P_tam_v$Phylum,P_tam_v$Class,P_tam_v$Order,P_tam_v$Family,P_tam_v$Genus,P_tam_v$Specie,P_tam_v$ASVs))
+
+length(P_tam_v$Delta[P_tam_v$Delta==0])
+length(P_tam_v$Delta[P_tam_v$Delta>0])
+length(P_tam_v$Delta[P_tam_v$Delta<0])
+
+P_chil_v <- merge(Soil_Pc_V, Root_Pc_V, by= "row.names")
+rownames(P_chil_v) <- P_chil_v$Row.names
+P_chil_v[,"ASVs"] <- P_chil_v$Row.names
+P_chil_v$ASVs <- as.factor(P_chil_v$ASVs)
+P_chil_v[,"Delta"] <- P_chil_v$Vicuna_P_chilensis-P_chil_v$Vicuna
+P_chil_v <- P_chil_v[,-1]
+
+P_chil_v <- merge(P_chil_v,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_chil_v, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Vicuña") +
+  scale_y_discrete(labels=paste(P_chil_v$Kingdom,P_chil_v$Phylum,P_chil_v$Class,P_chil_v$Order,P_chil_v$Family,P_chil_v$Genus,P_chil_v$Specie,P_chil_v$ASVs))
+
+length(P_chil_v$Delta[P_chil_v$Delta==0])
+length(P_chil_v$Delta[P_chil_v$Delta>0])
+length(P_chil_v$Delta[P_chil_v$Delta<0])
+
+df1 <- P_tam_v[order(abs(P_tam_v$Delta),decreasing = TRUE),] %>% head(30)
+df2 <- P_chil_v[order(abs(P_chil_v$Delta),decreasing = TRUE),] %>% head(30)
+
+df3 <- union(df1$Row.names,df2$Row.names)
+df1 <- P_tam_v[P_tam_v$Row.names %in% df3,]
+df2 <- P_chil_v[P_chil_v$Row.names %in% df3,]
+
+p1 <- ggplot(df2, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Vicuña") +
+  scale_y_discrete(labels=paste(df2$Kingdom,df2$Phylum,df2$Class,df2$Order,df2$Family,df2$Genus,df2$Specie,df2$ASVs))
+
+p2 <- ggplot(df1, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Vicuña") +
+  scale_y_discrete(labels=paste(df1$Kingdom,df1$Phylum,df1$Class,df1$Order,df1$Family,df1$Genus,df1$Specie,df1$ASVs))
+
+grid.arrange(p1, p2, ncol=2)
 ```
 
 #La Serena
