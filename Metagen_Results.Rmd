@@ -9,6 +9,10 @@ output:
     number_sections: true
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir=getwd())
+```
+
 # Libraries
 ```{r, echo =TRUE, message= FALSE}
 library(ggplot2) #plots
@@ -36,26 +40,24 @@ library(RColorBrewer) #color palette
 #Fungal metagenomics
 ## Amplicon sequencing analysis
 
-The amplicon sequencing analysis was made using qiime2 for pre-processing and phyloseq package for the phylogenetic analysis.
+The amplicon sequencing analysis was made using q2 for pre-processing and phyloseq package for the phylogenetic analysis.
 
 phyloseq object preparation
 ```{r}
 # ASV table
-ASVs <- read.table("Amplicon/ITS2/table_ITS2.txt", sep="\t", header=TRUE, row.names=1)
+ASVs <- read.table("ITS2/table_ITS2.txt", sep="\t", header=TRUE, row.names=1)
 # taxonomy
-taxonomy <- read.table("Amplicon/ITS2/taxonomy.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"))
+taxonomy <- read.table("ITS2/taxonomy.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"))
 taxonomy <- as.matrix(taxonomy)
 # tree
-tree <- read_tree("Amplicon/ITS2/tree.nwk")
+tree <- read_tree("ITS2/tree.nwk")
 # sample data
-metadata <- read.table("Amplicon/ITS2/metadata.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"),dec = ",")
+metadata <- read.table("ITS2/metadata.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"),dec = ",")
 # phyloseq object
 phy_obj <- phyloseq(otu_table(ASVs, taxa_are_rows = TRUE), 
                     tax_table(taxonomy), sample_data(metadata),tree)
 
 tax_table(phy_obj) <- gsub(".__","",tax_table(phy_obj)) #separate taxonomy in columns
-
-phy_obj <- subset_samples(phy_obj, Treatment=="Control")
 
 phy_obj_Fungi <- phy_obj
 ```
@@ -152,122 +154,6 @@ phy_obj_Fungi <- tip_glom(phy_obj_Fungi,hcfun = hclust)
 phy_obj_Fungi
 ```
 
-## P.chilensis 
-### Roots and Soil
-```{r echo= FALSE}
-#sub-setting soil dataset
-Pch <- subset_samples(phy_obj_Fungi, Specie=="P_chilensis")
-
-Pch_Rt <- subset_samples(Pch, Sample=="Root")
-
-Pch_Rt_Vic <- subset_samples(Pch_Rt, Soil=="Vicuna")
-Pch_Rt_Lan <- subset_samples(Pch_Rt, Soil=="Los_Angeles")
-Pch_Rt_LSe <- subset_samples(Pch_Rt, Soil=="La_Serena")
-
-Pch_Sl <- subset_samples(Pch, Sample=="Soil")
-
-Pch_Sl_Vic <- subset_samples(Pch_Sl, Soil=="Vicuna")
-Pch_Sl_Lan <- subset_samples(Pch_Sl, Soil=="Los_Angeles")
-Pch_Sl_LSe <- subset_samples(Pch_Sl, Soil=="La_Serena")
-Pch_Sl_Pal <- subset_samples(Pch_Sl, Soil=="Pozo_Almonte")
-
-#removing zero ASV's
-Pch_Rt_Vic <- prune_taxa(taxa_sums(Pch_Rt_Vic) > 0, Pch_Rt_Vic)
-Pch_Rt_Lan <- prune_taxa(taxa_sums(Pch_Rt_Lan) > 0, Pch_Rt_Lan)
-Pch_Rt_LSe <- prune_taxa(taxa_sums(Pch_Rt_LSe) > 0, Pch_Rt_LSe)
-Pch_Sl_Vic <- prune_taxa(taxa_sums(Pch_Sl_Vic) > 0, Pch_Sl_Vic)
-Pch_Sl_Lan <- prune_taxa(taxa_sums(Pch_Sl_Lan) > 0, Pch_Sl_Lan)
-Pch_Sl_LSe <- prune_taxa(taxa_sums(Pch_Sl_LSe) > 0, Pch_Sl_LSe)
-Pch_Sl_Pal <- prune_taxa(taxa_sums(Pch_Sl_Pal) > 0, Pch_Sl_Pal)
-
-# keeping ASVs names
-Pch_Rt_Vic <- rownames(tax_table(Pch_Rt_Vic))
-Pch_Rt_Lan <- rownames(tax_table(Pch_Rt_Lan))
-Pch_Rt_LSe <- rownames(tax_table(Pch_Rt_LSe))
-Pch_Sl_Vic <- rownames(tax_table(Pch_Sl_Vic))
-Pch_Sl_Lan <- rownames(tax_table(Pch_Sl_Lan))
-Pch_Sl_LSe <- rownames(tax_table(Pch_Sl_LSe))
-Pch_Sl_Pal <- rownames(tax_table(Pch_Sl_Pal))
-```
-
-```{r}
-#Roots
-#pdf("Manuscript/Plots/Supplementary/Fungal_Venn_Pch_root.pdf")
-plot.new()
-suppressWarnings(grid.draw(venn.diagram(
-  list(Pch_Rt_Vic=Pch_Rt_Vic,Pch_Rt_Lan=Pch_Rt_Lan,Pch_Rt_LSe=Pch_Rt_LSe),
-  filename=NULL, col=c("darkgoldenrod3","darkorange","gold"), margin=c(0.35,0.35,0.35,0.35),
-  category.names=c("Vicuña","Los Angeles","La Serena"))))
-#dev.off()
-
-#Soil
-#pdf("Manuscript/Plots/Supplementary/Fungal_Venn_Pch_Soil.pdf")
-plot.new()
-suppressWarnings(grid.draw(venn.diagram(
-  list(Pch_Sl_Vic=Pch_Sl_Vic,Pch_Sl_Lan=Pch_Sl_Lan,Pch_Sl_LSe=Pch_Sl_LSe,Pch_Sl_Pal=Pch_Sl_Pal),
-  filename=NULL, col=c("darkgoldenrod3","darkorange","gold","brown"), margin=c(0.35,0.35,0.35,0.35),
-  category.names=c("Vicuña","Los Angeles","La Serena","Pozo Almonte"))))
-#dev.off()
-```
-
-## P.tamarugo 
-### Roots and Soil
-```{r echo= FALSE}
-#sub-setting soil dataset
-Pta <- subset_samples(phy_obj_Fungi, Specie=="P_tamarugo")
-
-Pta_Rt <- subset_samples(Pta, Sample=="Root")
-
-Pta_Rt_Vic <- subset_samples(Pta_Rt, Soil=="Vicuna")
-Pta_Rt_Lan <- subset_samples(Pta_Rt, Soil=="Los_Angeles")
-Pta_Rt_LSe <- subset_samples(Pta_Rt, Soil=="La_Serena")
-
-Pta_Sl <- subset_samples(Pta, Sample=="Soil")
-
-Pta_Sl_Vic <- subset_samples(Pta_Sl, Soil=="Vicuna")
-Pta_Sl_Lan <- subset_samples(Pta_Sl, Soil=="Los_Angeles")
-Pta_Sl_LSe <- subset_samples(Pta_Sl, Soil=="La_Serena")
-Pta_Sl_Pal <- subset_samples(Pta_Sl, Soil=="Pozo_Almonte")
-
-#removing zero ASV's
-Pta_Rt_Vic <- prune_taxa(taxa_sums(Pta_Rt_Vic) > 0, Pta_Rt_Vic)
-Pta_Rt_Lan <- prune_taxa(taxa_sums(Pta_Rt_Lan) > 0, Pta_Rt_Lan)
-Pta_Rt_LSe <- prune_taxa(taxa_sums(Pta_Rt_LSe) > 0, Pta_Rt_LSe)
-Pta_Sl_Vic <- prune_taxa(taxa_sums(Pta_Sl_Vic) > 0, Pta_Sl_Vic)
-Pta_Sl_Lan <- prune_taxa(taxa_sums(Pta_Sl_Lan) > 0, Pta_Sl_Lan)
-Pta_Sl_LSe <- prune_taxa(taxa_sums(Pta_Sl_LSe) > 0, Pta_Sl_LSe)
-Pta_Sl_Pal <- prune_taxa(taxa_sums(Pta_Sl_Pal) > 0, Pta_Sl_Pal)
-
-# keeping ASVs names
-Pta_Rt_Vic <- rownames(tax_table(Pta_Rt_Vic))
-Pta_Rt_Lan <- rownames(tax_table(Pta_Rt_Lan))
-Pta_Rt_LSe <- rownames(tax_table(Pta_Rt_LSe))
-Pta_Sl_Vic <- rownames(tax_table(Pta_Sl_Vic))
-Pta_Sl_Lan <- rownames(tax_table(Pta_Sl_Lan))
-Pta_Sl_LSe <- rownames(tax_table(Pta_Sl_LSe))
-Pta_Sl_Pal <- rownames(tax_table(Pta_Sl_Pal))
-```
-
-```{r}
-#Roots
-#pdf("Manuscript/Plots/Supplementary/Fungal_Venn_Pta_root.pdf")
-plot.new()
-suppressWarnings(grid.draw(venn.diagram(
-  list(Pta_Rt_Vic=Pta_Rt_Vic,Pta_Rt_Lan=Pta_Rt_Lan,Pta_Rt_LSe=Pta_Rt_LSe),
-  filename=NULL, col=c("darkgoldenrod3","darkorange","gold"), margin=c(0.35,0.35,0.35,0.35),
-  category.names=c("Vicuña","Los Angeles","La Serena"))))
-#dev.off()
-
-#Soils
-#pdf("Manuscript/Plots/Supplementary/Fungal_Venn_Pta_soil.pdf")
-plot.new()
-suppressWarnings(grid.draw(venn.diagram(
-  list(Pta_Sl_Vic=Pta_Sl_Vic,Pta_Sl_Lan=Pta_Sl_Lan,Pta_Sl_LSe=Pta_Sl_LSe,Pta_Sl_Pal=Pta_Sl_Pal),
-  filename=NULL, col=c("darkgoldenrod3","darkorange","gold","brown"), margin=c(0.35,0.35,0.35,0.35),
-  category.names=c("Vicuña","Los Angeles","La Serena","Pozo Almonte"))))
-#dev.off()
-```
-
 Library size and normalization
 ```{r}
 #Library size
@@ -301,7 +187,6 @@ faiths_div$Specie <- as.factor(faiths_div$Specie)
 
 Plotting richness
 ```{r echo= FALSE}
-#pdf("Manuscript/Plots/Fungal_Richness_soil.pdf")
 ggplot(data=faiths_div %>% filter(Sample=="Soil"), aes(x = Sample, y = SR, fill = Soil)) +
   stat_boxplot(geom = "errorbar") +
   geom_boxplot(size = 1) + 
@@ -313,10 +198,8 @@ ggplot(data=faiths_div %>% filter(Sample=="Soil"), aes(x = Sample, y = SR, fill 
         axis.title.x = element_blank(),
         panel.border = element_rect(size = 2, fill = NA)) +
   scale_y_continuous(name = "Specie richness")
-#dev.off()
 ```
 ```{r echo= FALSE}
-#pdf("Manuscript/Plots/Fungal_Richness_soil.pdf")
 ggplot(data=faiths_div %>% filter(Sample=="Root"), aes(x = Sample, y = SR, fill = Specie)) +
   stat_boxplot(geom = "errorbar") +
   geom_boxplot(size = 1) + 
@@ -328,11 +211,9 @@ ggplot(data=faiths_div %>% filter(Sample=="Root"), aes(x = Sample, y = SR, fill 
         axis.title.x = element_blank(),
         panel.border = element_rect(size = 2, fill = NA)) +
   scale_y_continuous(name = "Specie richness")
-#dev.off()
 ```
 
 ```{r echo= FALSE}
-#pdf("Manuscript/Plots/Fungal_Richness.pdf")
 ggplot(faiths_div, aes(x = Specie, y = SR, fill = Soil)) +
   stat_boxplot(geom = "errorbar") +
   geom_boxplot(size = 1) + 
@@ -345,7 +226,6 @@ ggplot(faiths_div, aes(x = Specie, y = SR, fill = Soil)) +
         panel.border = element_rect(size = 2, fill = NA)) +
   scale_y_continuous(name = "Specie richness",limits = c(0,80)) + 
   facet_grid(.~Sample)
-#dev.off()
 ```
 Statistical analysis of richness using Kruskal-Wallis. Any significant differences were further analysed with Dunn’s test with dunnTest() function from FAS package.
 The model used was richness~Sample type, richness~ fertilization type and richness~sample*fertilization
@@ -380,7 +260,6 @@ shannon_div$Specie <- as.factor(shannon_div$Specie)
 
 Plotting alpha diversity index
 ```{r echo= FALSE}
-#pdf("Manuscript/Plots/Fungal_alpha_soil.pdf")
 ggplot(data=shannon_div %>% filter(Sample=="Soil"), aes(x = Treatment, y = shannon_div, fill = Soil)) +
   stat_boxplot(geom = "errorbar") +
   geom_boxplot(size = 1) + 
@@ -392,11 +271,9 @@ ggplot(data=shannon_div %>% filter(Sample=="Soil"), aes(x = Treatment, y = shann
         axis.title.x = element_blank(),
         panel.border = element_rect(size = 2, fill = NA)) +
   scale_y_continuous(name = "Shannon Diversity Index")
-#dev.off()
 ```
 
 ```{r echo= FALSE}
-#pdf("Manuscript/Plots/Fungal_alpha.pdf")
 ggplot(shannon_div, aes(x = Specie, y = shannon_div, fill = Soil)) +
   stat_boxplot(geom = "errorbar") +
   geom_boxplot(size = 1) + 
@@ -409,7 +286,6 @@ ggplot(shannon_div, aes(x = Specie, y = shannon_div, fill = Soil)) +
         panel.border = element_rect(size = 2, fill = NA)) +
   scale_y_continuous(name = "Shannon Diversity Index",limits = c(0,3.5)) + 
   facet_grid(.~Sample)
-#dev.off()
 ```
 
 Statistical analysis of Shannon diversity index using Kruskal-Wallis. Any significant differences were further analysed with Dunn’s test with dunnTest() function from FAS package.
@@ -429,152 +305,6 @@ a_soil <- shannon_div %>%
 
 agricolae::kruskal(a_soil$shannon_div, a_soil$Soil, p.adj = "fdr", group = T, console = T)
 ```
-### Evenness
-```{r}
-even <- otu_table(phy_obj_Fungi)
-even <- as.data.frame(even)
-
-tax <- paste(tax_table(phy_obj_Fungi)[,1],tax_table(phy_obj_Fungi)[,2],tax_table(phy_obj_Fungi)[,3],
-      tax_table(phy_obj_Fungi)[,4],tax_table(phy_obj_Fungi)[,5],tax_table(phy_obj_Fungi)[,6],
-      tax_table(phy_obj_Fungi)[,7], sep = "; ")
-even[,"taxonomy"] <- tax
-
-even <- RAM::evenness(data=list(even=even), index = "shannon")
-even <- as.data.frame(t(even))
-
-even <- merge(even,sample_data(phy_obj_Fungi), by = "row.names")
-even$Soil <- factor(even$Soil, levels=c('Pozo_Almonte','La_Serena','Vicuna','Los_Angeles'))
-```
-
-```{r}
-#pdf("Manuscript/Plots/Fungal_even_soil.pdf")
-ggplot(data=even %>% filter(Sample=="Soil"), aes(x = Treatment, y = even, fill = Soil)) +
-  stat_boxplot(geom = "errorbar") +
-  geom_boxplot(size = 1) + 
-  scale_fill_manual(values=c("brown", "gold","darkgoldenrod3","darkorange")) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_rect(size = 2, fill = NA)) +
-  scale_y_continuous(name = "Pielou's Evenness")
-#dev.off()
-```
-
-```{r}
-#pdf("Manuscript/Plots/Fungal_even.pdf")
-ggplot(even, aes(x = Specie, y = even, fill = Soil)) +
-  stat_boxplot(geom = "errorbar") +
-  geom_boxplot(size = 1) + 
-  scale_fill_manual(values=c("brown", "gold","darkgoldenrod3","darkorange")) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_rect(size = 2, fill = NA)) +
-  scale_y_continuous(name = "Pielou's Evenness",limits = c(0,1)) + 
-  facet_grid(.~Sample)
-#dev.off()
-```
-
-```{r}
-e_root <- even %>%
-  filter(Sample == "Root")
-
-agricolae::kruskal(e_root$even, e_root$Specie, p.adj = "fdr", group = T, console = T)
-
-agricolae::kruskal(e_root %>% filter(Specie=="P_chilensis") %>% dplyr::select(even), e_root %>% filter(Specie=="P_chilensis") %>% dplyr::select(Soil), p.adj = "fdr", group = T, console = T)
-
-agricolae::kruskal(e_root %>% filter(Specie=="P_tamarugo") %>% dplyr::select(even), e_root %>% filter(Specie=="P_tamarugo") %>% dplyr::select(Soil), p.adj = "fdr", group = T, console = T)
-
-e_soil <- even %>%
-  filter(Sample == "Soil")
-
-agricolae::kruskal(e_soil$even, e_soil$Soil, p.adj = "fdr", group = T, console = T)
-```
-
-```{r}
-df <- faiths_div %>%
-  left_join(
-    shannon_div, by = "Row.names") %>%
-  left_join(
-    even, by = "Row.names")
-
-
-df <- df %>% dplyr::select("Row.names", "SR","shannon_div","even","Sample","Specie","Soil")
-df[,"all"] <- paste(df$Sample,df$Soil, sep = ".")
-
-df <- as.data.frame(c(aggregate(SR~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = df),(aggregate(shannon_div~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = df)),(aggregate(even~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = df))))
-
-df <- df %>% dplyr::select(all,SR.mean, SR.sd, shannon_div.mean, shannon_div.sd, even.mean, even.sd)
-
-rownames(df) <- df$all
-df <- df[-1]
-
-df$SR.mean <- round(df$SR.mean, digits = 2)
-df$shannon_div.mean <- round(df$shannon_div.mean, digits = 2)
-df$even.mean <- round(df$even.mean, digits = 2)
-
-df$SR.sd <- round(df$SR.sd, digits = 3)
-df$shannon_div.sd <- round(df$shannon_div.sd, digits = 3)
-df$even.sd <- round(df$even.sd, digits = 3)
-df
-
-#write.csv(df,"Manuscript/Plots/Supplementary/Fungal_soil_div.csv")
-```
-
-
-```{r}
-Pch <- faiths_div %>%
-  filter(Specie=="P_chilensis") %>%
-  left_join(
-    shannon_div, by = "Row.names") %>%
-  left_join(
-    even, by = "Row.names")
-
-Pch <- Pch %>% dplyr::select("Row.names", "SR","shannon_div","even","Sample","Specie","Soil")
-Pch[,"all"] <- paste(Pch$Sample,Pch$Specie,Pch$Soil, sep = ".")
-
-df <- as.data.frame(c(aggregate(SR~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pch),(aggregate(shannon_div~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pch)),(aggregate(even~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pch))))
-
-df <- df %>% dplyr::select(all,SR.mean, SR.sd, shannon_div.mean, shannon_div.sd, even.mean, even.sd)
-
-rownames(df) <- df$all
-df <- df[-1]
-
-Pta <- faiths_div %>%
-  filter(Specie=="P_tamarugo") %>%
-  left_join(
-    shannon_div, by = "Row.names") %>%
-  left_join(
-    even, by = "Row.names")
-
-Pta <- Pta %>% dplyr::select("Row.names", "SR","shannon_div","even","Sample","Specie","Soil")
-Pta[,"all"] <- paste(Pta$Sample,Pta$Specie,Pta$Soil, sep = ".")
-
-df2 <- as.data.frame(c(aggregate(SR~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pta),(aggregate(shannon_div~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pta)),(aggregate(even~all, FUN=function(x) c(mean = mean(x), sd = sd(x)), data = Pta))))
-
-df2 <- df2 %>% dplyr::select(all,SR.mean, SR.sd, shannon_div.mean, shannon_div.sd, even.mean, even.sd)
-
-rownames(df2) <- df2$all
-df2 <- df2[-1]
-
-df <- rbind(df,df2)
-
-df$SR.mean <- round(df$SR.mean, digits = 2)
-df$shannon_div.mean <- round(df$shannon_div.mean, digits = 2)
-df$even.mean <- round(df$even.mean, digits = 2)
-
-df$SR.sd <- round(df$SR.sd, digits = 3)
-df$shannon_div.sd <- round(df$shannon_div.sd, digits = 3)
-df$even.sd <- round(df$even.sd, digits = 3)
-
-df
-
-#write.csv(df,"Manuscript/Plots/Supplementary/Fungal_richness_alpha.csv")
-```
 
 ### Beta diversity
 Beta diversity was evaluated using PCoA with bray-curtis distance
@@ -584,74 +314,46 @@ Beta diversity was evaluated using PCoA with bray-curtis distance
 ord <- ordinate(subset_samples(phy_raref, Sample == "Soil"), method = "PCoA", distance = "bray", weighted=FALSE)
 sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Sample, sep="-")
 
-#pdf("Manuscript/Plots/Fungal_beta_soil.pdf",height=10, width=10)
-plot_ordination(phy_norm, ord, color = "Soil", shape = "Specie_sample") + geom_point(size=7) +
-  scale_color_manual(values=c("gold", "darkorange", "brown", "darkgoldenrod3")) + scale_shape_manual(values = c(15,17,22,24)) +
+plot1<- gg_ordiplot(ord$vectors, groups = sample_data(subset_samples(phy_norm, Sample == "Soil"))$Soil, hull = TRUE, 
+            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = T)
+
+ggplot(data=plot1$df_spiders) + 
+  geom_point(aes(x=x, y=y,shape=Group, colour=Group), size = 5) +
+  geom_point(aes(x=cntr.x, y=cntr.y), size = 5, shape = 18) +
+  scale_color_manual(values=c("gold", "darkorange", "brown", "darkgoldenrod3")) + scale_shape_manual(values = c(19,19,19,19)) +
   theme_bw() + 
   theme(legend.position = "bottom", legend.box = "vertical", 
         text=element_text(size = 18),
         axis.text.x = element_text(size = 16, colour = "black"),
         axis.text.y = element_text(size = 16, colour = "black"),
-        panel.border = element_rect(size = 2, fill = NA)) + 
-  scale_y_continuous(limits = c(-0.6,0.6)) + 
-  scale_x_continuous(limits = c(-0.6,0.6))
-#dev.off()
+        panel.border = element_rect(size = 2, fill = NA))
+
+(sim <- with(sample_data(subset_samples(phy_norm, Sample == "Soil")), simper(t(otu_table(subset_samples(phy_norm, Sample == "Soil"))), Soil)))
+#summary(sim)
 ```
+
 ```{r echo= FALSE}
 #Root
 ord <- ordinate(subset_samples(phy_raref, Sample == "Root"), method = "PCoA", distance = "bray", weighted=FALSE)
-sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Sample, sep="-")
+sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Soil, sep="-")
 
-#pdf("Manuscript/Plots/Fungal_beta_root.pdf",height=10, width=10)
-plot_ordination(phy_norm, ord, color = "Soil", shape = "Specie_sample") + geom_point(size=7) +
-  scale_color_manual(values=c("gold", "darkorange", "darkgoldenrod3")) + scale_shape_manual(values = c(15,17,22,24)) +
+plot1<- gg_ordiplot(ord$vectors, groups = sample_data(subset_samples(phy_norm, Sample == "Root"))$Specie_sample, hull = TRUE, 
+            label = TRUE, spiders = TRUE, ellipse = FALSE, pt.size = 7, plot = T)
+
+ggplot(data=plot1$df_spiders) + 
+  geom_point(aes(x=x, y=y,shape=Group, colour=Group), size = 5) +
+  geom_point(aes(x=cntr.x, y=cntr.y), size = 5, shape = 18) +
+  geom_label(aes(x=cntr.x, y=cntr.y, label=Group, color=Group)) +
+  scale_color_manual(values=c("gold", "darkorange", "darkgoldenrod3","gold", "darkorange", "darkgoldenrod3")) + scale_shape_manual(values = c(15,15,15,17,17,17)) +
   theme_bw() + 
   theme(legend.position = "bottom", legend.box = "vertical", 
         text=element_text(size = 18),
         axis.text.x = element_text(size = 16, colour = "black"),
         axis.text.y = element_text(size = 16, colour = "black"),
-        panel.border = element_rect(size = 2, fill = NA)) + 
-  scale_y_continuous(limits = c(-0.6,0.6)) + 
-  scale_x_continuous(limits = c(-0.4,0.6))
-#dev.off()
-```
+        panel.border = element_rect(size = 2, fill = NA))
 
-```{r echo= FALSE}
-#All samples
-ord <- ordinate(phy_raref, method = "PCoA", distance = "bray", weighted=FALSE)
-sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Sample, sep="-")
-
-#pdf("Manuscript/Plots/Fungal_beta.pdf",height=10, width=10)
-plot_ordination(phy_norm, ord, color = "Soil", shape = "Specie_sample") + geom_point(size=7) +
-  scale_color_manual(values=c("gold", "darkorange", "brown", "darkgoldenrod3")) + scale_shape_manual(values = c(15,22,17,24)) +
-  theme_bw() + 
-  theme(legend.position = "bottom", legend.box = "vertical", 
-        text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        panel.border = element_rect(size = 2, fill = NA)) + 
-  scale_y_continuous(limits = c(-0.6,0.6)) + 
-  scale_x_continuous(limits = c(-0.4,0.6))
-#dev.off()
-```
-
-```{r echo= FALSE}
-#All samples
-ord <- ordinate(phy_raref, method = "PCoA", distance = "bray", weighted=FALSE)
-
-#pdf("Manuscript/Plots/Fungal_beta_2.pdf",height=10, width=10)
-plot_ordination(phy_norm, ord, color = "Soil", shape = "Specie") + geom_point(size=7) +
-  scale_color_manual(values=c("gold", "darkorange", "brown", "darkgoldenrod3")) + scale_shape_manual(values = c(15,22,18,23)) +
-  theme_bw() + 
-  theme(legend.position = "bottom", legend.box = "vertical", 
-        text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        panel.border = element_rect(size = 2, fill = NA)) + 
-  scale_y_continuous(limits = c(-0.6,0.6)) + 
-  scale_x_continuous(limits = c(-0.4,0.6)) + 
-  facet_grid(.~Sample)
-#dev.off()
+(sim <- with(sample_data(subset_samples(phy_norm, Sample == "Root")), simper(t(otu_table(subset_samples(phy_norm, Sample == "Root"))), Specie_sample)))
+#summary(sim)
 ```
 
 Statistical analysis of beta diversity using PerMANOVA with adonis() function from vegan package.
@@ -668,366 +370,81 @@ adonis(t(otu_table(tmp)) ~ Specie * Sample * Soil, data = data.frame(sample_data
 ```
 
 ## Community composition
-### Phyla
-phy_mrg object preparation
-```{r}
-sample_data(phy_obj_Fungi)[,"samples_sp"] <- paste(sample_data(phy_obj_Fungi)$Sample,sample_data(phy_obj_Fungi)$Specie,sample_data(phy_obj_Fungi)$Soil, sep = ".")
+### Disimilarity Heatmap
+``` {r echo= FALSE}
+# Preparing data
+phy_obj_Soils <- subset_samples(phy_obj_Fungi, Sample == "Soil")
 
-taxonomy2 <- data.frame(paste(taxonomy[,1],taxonomy[,2],taxonomy[,3],taxonomy[,4],
-                  taxonomy[,5],taxonomy[,6],taxonomy[,7],sep = ";"))
-rownames(taxonomy2) <- rownames(taxonomy)
+phy_norm_Soils <- transform_sample_counts(phy_obj_Soils,function(x) x/sum(x))
+
+taxonomy2 <- data.frame(paste(tax_table(phy_norm_Soils)[,1],tax_table(phy_norm_Soils)[,2],tax_table(phy_norm_Soils)[,3],tax_table(phy_norm_Soils)[,4],
+                  tax_table(phy_norm_Soils)[,5],tax_table(phy_norm_Soils)[,6],tax_table(phy_norm_Soils)[,7],sep = ";"))
+rownames(taxonomy2) <- rownames(tax_table(phy_norm_Soils))
 colnames(taxonomy2) <- "taxonomy"
 taxonomy2[,"ASV"] <- rownames(taxonomy2)
 
-#' Merging data
-phy_mrg <- merge_samples(phy_obj_Fungi, group = "samples_sp", fun = "mean")
+sim <- with(sample_data(subset_samples(phy_norm, Sample == "Soil")), simper(t(otu_table(subset_samples(phy_norm, Sample == "Soil"))), Soil))
+summary(sim)
+
+df1 <- rownames(summary(sim)[[1]] %>% filter(cumsum < .7)) #LS_V
+df2 <- rownames(summary(sim)[[2]] %>% filter(cumsum < .7)) #LS_PA
+df3 <- rownames(summary(sim)[[3]] %>% filter(cumsum < .7)) #LS_LA
+df4 <- rownames(summary(sim)[[4]] %>% filter(cumsum < .7)) #V_PA
+df5 <- rownames(summary(sim)[[5]] %>% filter(cumsum < .7)) #V_LA
+df6 <- rownames(summary(sim)[[6]] %>% filter(cumsum < .7)) #PA_LA
+
+union(union(df2,df4),df6) #all ASV's that makes PA different
+intersect(intersect(df2,df4),df6) #common ASV's that makes PA different
+
+union(union(df3,df5),df6) #all ASV's that makes LA different
+intersect(intersect(df3,df5),df6) #common ASV's that makes LA different
+
+union(union(df1,df2),df3) #all ASV's that makes LS different
+intersect(intersect(df1,df2),df3) #common ASV's that makes LS different
+
+union(union(df1,df4),df5) #all ASV's that makes V different
+intersect(intersect(df1,df4),df5) #common ASV's that makes V different
+
+ASV_list <- union(df1,df2)
+ASV_list <- union(ASV_list,df3)
+ASV_list <- union(ASV_list,df4)
+ASV_list <- union(ASV_list,df5)
+ASV_list <- union(ASV_list,df6)
+
+phy_mrg <- merge_samples(phy_norm_Soils, group = "Soil", fun = "mean")
+
+phy_mrg <- prune_taxa(ASV_list, phy_mrg)
 
 phy_mrg <- otu_table(t(phy_mrg))
 
 phy_mrg <- as.data.frame(phy_mrg)
-
-phy_mrg[,"ASV"] <- rownames(phy_mrg)
-
-phy_mrg <- join_all(list(phy_mrg, taxonomy2), by= "ASV", type = "left")
-rownames(phy_mrg) <- phy_mrg$ASV
-```
-
-
-Stacked Plots by Families
-```{r}
-Pch_Rt_Lan_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Rt_Lan,]
-Pch_Rt_LSe_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Rt_LSe,]
-Pch_Rt_Vic_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Rt_Vic,]
-Pch_Sl_Lan_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Sl_Lan,]
-Pch_Sl_LSe_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Sl_LSe,]
-Pch_Sl_Pal_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Sl_Pal,]
-Pch_Sl_Vic_2 <- phy_mrg[rownames(phy_mrg) %in% Pch_Sl_Vic,]
-
-Pta_Rt_Lan_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Rt_Lan,]
-Pta_Rt_LSe_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Rt_LSe,]
-Pta_Rt_Vic_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Rt_Vic,]
-Pta_Sl_Lan_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Sl_Lan,]
-Pta_Sl_LSe_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Sl_LSe,]
-Pta_Sl_Pal_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Sl_Pal,]
-Pta_Sl_Vic_2 <- phy_mrg[rownames(phy_mrg) %in% Pta_Sl_Vic,]
-```
-
-```{r}
-#prepare 'random' color scale
-scheme <- iwanthue(seed = 42, force_init = TRUE)
-
-col_hcl <- list(c(0, 360),   # hue range [0,360]
-                c(0, 100),     # chroma range [0,3]
-                c(0, 100))   # lightness range [0,1.5]
-
-Fungal_cols <- scheme$hex(n = 10, force_mode = FALSE, quality = 50, color_space = col_hcl)
-```
-
-#### P. chilensis roots
-```{r echo= FALSE}
-fam <- stringr::str_split_fixed(Pch_Rt_Lan_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Rt_Lan_2[,"Phylum"] <- fam
-
-Pch_Rt_Lan_2_df <- as.data.frame(table(Pch_Rt_Lan_2$Phylum))
-Pch_Rt_Lan_2_df$Freq <- Pch_Rt_Lan_2_df$Freq / sum(Pch_Rt_Lan_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pch_Rt_LSe_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Rt_LSe_2[,"Phylum"] <- fam
-
-Pch_Rt_LSe_2_df <- as.data.frame(table(Pch_Rt_LSe_2$Phylum))
-Pch_Rt_LSe_2_df$Freq <- Pch_Rt_LSe_2_df$Freq / sum(Pch_Rt_LSe_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pch_Rt_Vic_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Rt_Vic_2[,"Phylum"] <- fam
-
-Pch_Rt_Vic_2_df <- as.data.frame(table(Pch_Rt_Vic_2$Phylum))
-Pch_Rt_Vic_2_df$Freq <- Pch_Rt_Vic_2_df$Freq / sum(Pch_Rt_Vic_2_df$Freq) * 100
-
-m <- rbind(Pch_Rt_Lan_2_df,Pch_Rt_LSe_2_df,Pch_Rt_Vic_2_df)
-m[,"Sample"] <- c(rep("Los Angeles",times = length(Pch_Rt_Lan_2_df$Freq)), rep("La Serena", times = length(Pch_Rt_LSe_2_df$Freq)), rep("Vicuña",times = length(Pch_Rt_Vic_2_df$Freq)))
-m$Freq <- round(m$Freq,2)
-colnames(m) <- c("Phylum","Percentage", "Sample")
-m$Sample <- factor(m$Sample, levels=c('La Serena','Vicuña','Los Angeles'))
-sum(m$Percentage)
-```
-
-```{r}
-#pdf("Manuscript/Plots/Supplementary/fungal_phyla_Pch_root.pdf", height = 10, width = 15)
-ggplot(m, aes(y= Percentage, x = Sample, fill = Phylum))+
-  geom_bar(stat = "identity", position = "stack", width = 0.5)+
-  geom_text(data=m, aes(x = Sample,y= Percentage, label = paste0(Percentage,"%")),
-            position = position_stack(vjust = .5),
-            colour="black", size=2.5) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_blank(),
-        axis.line.x = element_line(colour = "black", size = 1),
-        axis.line.y = element_line(colour = "black", size = 1)) +
-  scale_fill_manual(values = Fungal_cols) + 
-  coord_flip()
-#dev.off()
-```
-
-#### P. chilensis soil
-```{r echo= FALSE}
-fam <- stringr::str_split_fixed(Pch_Sl_Lan_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Sl_Lan_2[,"Phylum"] <- fam
-
-Pch_Sl_Lan_2_df <- as.data.frame(table(Pch_Sl_Lan_2$Phylum))
-Pch_Sl_Lan_2_df$Freq <- Pch_Sl_Lan_2_df$Freq / sum(Pch_Sl_Lan_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pch_Sl_LSe_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Sl_LSe_2[,"Phylum"] <- fam
-
-Pch_Sl_LSe_2_df <- as.data.frame(table(Pch_Sl_LSe_2$Phylum))
-Pch_Sl_LSe_2_df$Freq <- Pch_Sl_LSe_2_df$Freq / sum(Pch_Sl_LSe_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pch_Sl_Vic_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Sl_Vic_2[,"Phylum"] <- fam
-
-Pch_Sl_Vic_2_df <- as.data.frame(table(Pch_Sl_Vic_2$Phylum))
-Pch_Sl_Vic_2_df$Freq <- Pch_Sl_Vic_2_df$Freq / sum(Pch_Sl_Vic_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pch_Sl_Pal_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pch_Sl_Pal_2[,"Phylum"] <- fam
-
-Pch_Sl_Pal_2_df <- as.data.frame(table(Pch_Sl_Pal_2$Phylum))
-Pch_Sl_Pal_2_df$Freq <- Pch_Sl_Pal_2_df$Freq / sum(Pch_Sl_Pal_2_df$Freq) * 100
-
-m <- rbind(Pch_Sl_Lan_2_df,Pch_Sl_LSe_2_df,Pch_Sl_Vic_2_df,Pch_Sl_Pal_2_df)
-m[,"Sample"] <- c(rep("Los Angeles",times = length(Pch_Sl_Lan_2_df$Freq)), rep("La Serena", times = length(Pch_Sl_LSe_2_df$Freq)), rep("Vicuña",times = length(Pch_Sl_Vic_2_df$Freq)), rep("Pozo Almonte",times = length(Pch_Sl_Pal_2_df$Freq)))
-m$Freq <- round(m$Freq,2)
-colnames(m) <- c("Phylum","Percentage", "Sample")
-m$Sample <- factor(m$Sample, levels=c('Pozo Almonte','La Serena','Vicuña','Los Angeles'))
-sum(m$Percentage)
-```
-
-```{r}
-#pdf("Manuscript/Plots/Supplementary/fungal_phyla_Pch_soil.pdf", height = 10, width = 15)
-ggplot(m, aes(y= Percentage, x = Sample, fill = Phylum))+
-  geom_bar(stat = "identity", position = "stack", width = 0.5)+
-  geom_text(data=m, aes(x = Sample,y= Percentage, label = paste0(Percentage,"%")),
-            position = position_stack(vjust = .5),
-            colour="black", size=2.5) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_blank(),
-        axis.line.x = element_line(colour = "black", size = 1),
-        axis.line.y = element_line(colour = "black", size = 1)) +
-  scale_fill_manual(values = Fungal_cols) + 
-  coord_flip()
-#dev.off()
-```
-
-#### P. tamarugo roots
-```{r echo= FALSE}
-fam <- stringr::str_split_fixed(Pta_Rt_Lan_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Rt_Lan_2[,"Phylum"] <- fam
-
-Pta_Rt_Lan_2_df <- as.data.frame(table(Pta_Rt_Lan_2$Phylum))
-Pta_Rt_Lan_2_df$Freq <- Pta_Rt_Lan_2_df$Freq / sum(Pta_Rt_Lan_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pta_Rt_LSe_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Rt_LSe_2[,"Phylum"] <- fam
-
-Pta_Rt_LSe_2_df <- as.data.frame(table(Pta_Rt_LSe_2$Phylum))
-Pta_Rt_LSe_2_df$Freq <- Pta_Rt_LSe_2_df$Freq / sum(Pta_Rt_LSe_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pta_Rt_Vic_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Rt_Vic_2[,"Phylum"] <- fam
-
-Pta_Rt_Vic_2_df <- as.data.frame(table(Pta_Rt_Vic_2$Phylum))
-Pta_Rt_Vic_2_df$Freq <- Pta_Rt_Vic_2_df$Freq / sum(Pta_Rt_Vic_2_df$Freq) * 100
-
-m <- rbind(Pta_Rt_Lan_2_df,Pta_Rt_LSe_2_df,Pta_Rt_Vic_2_df)
-m[,"Sample"] <- c(rep("Los Angeles",times = length(Pta_Rt_Lan_2_df$Freq)), rep("La Serena", times = length(Pta_Rt_LSe_2_df$Freq)), rep("Vicuña",times = length(Pta_Rt_Vic_2_df$Freq)))
-m$Freq <- round(m$Freq,2)
-colnames(m) <- c("Phylum","Percentage", "Sample")
-m$Sample <- factor(m$Sample, levels=c('La Serena','Vicuña','Los Angeles'))
-sum(m$Percentage)
-```
-
-```{r}
-#pdf("Manuscript/Plots/Supplementary/fungal_phyla_Pta_root.pdf", height = 10, width = 15)
-ggplot(m, aes(y= Percentage, x = Sample, fill = Phylum))+
-  geom_bar(stat = "identity", position = "stack", width = 0.5)+
-  geom_text(data=m, aes(x = Sample,y= Percentage, label = paste0(Percentage,"%")),
-            position = position_stack(vjust = .5),
-            colour="black", size=2.5) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_blank(),
-        axis.line.x = element_line(colour = "black", size = 1),
-        axis.line.y = element_line(colour = "black", size = 1)) +
-  scale_fill_manual(values = Fungal_cols) + 
-  coord_flip()
-#dev.off()
-```
-
-#### P. tamarugo soil
-```{r echo= FALSE}
-fam <- stringr::str_split_fixed(Pta_Sl_Lan_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Sl_Lan_2[,"Phylum"] <- fam
-
-Pta_Sl_Lan_2_df <- as.data.frame(table(Pta_Sl_Lan_2$Phylum))
-Pta_Sl_Lan_2_df$Freq <- Pta_Sl_Lan_2_df$Freq / sum(Pta_Sl_Lan_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pta_Sl_LSe_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Sl_LSe_2[,"Phylum"] <- fam
-
-Pta_Sl_LSe_2_df <- as.data.frame(table(Pta_Sl_LSe_2$Phylum))
-Pta_Sl_LSe_2_df$Freq <- Pta_Sl_LSe_2_df$Freq / sum(Pta_Sl_LSe_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pta_Sl_Vic_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Sl_Vic_2[,"Phylum"] <- fam
-
-Pta_Sl_Vic_2_df <- as.data.frame(table(Pta_Sl_Vic_2$Phylum))
-Pta_Sl_Vic_2_df$Freq <- Pta_Sl_Vic_2_df$Freq / sum(Pta_Sl_Vic_2_df$Freq) * 100
-
-fam <- stringr::str_split_fixed(Pta_Sl_Pal_2$taxonomy, "p__",2)
-fam <- fam[,2]
-fam <- stringr::str_split_fixed(fam,";c__",2)
-fam <- fam[,1]
-Pta_Sl_Pal_2[,"Phylum"] <- fam
-
-Pta_Sl_Pal_2_df <- as.data.frame(table(Pta_Sl_Pal_2$Phylum))
-Pta_Sl_Pal_2_df$Freq <- Pta_Sl_Pal_2_df$Freq / sum(Pta_Sl_Pal_2_df$Freq) * 100
-
-m <- rbind(Pta_Sl_Lan_2_df,Pta_Sl_LSe_2_df,Pta_Sl_Vic_2_df,Pta_Sl_Pal_2_df)
-m[,"Sample"] <- c(rep("Los Angeles",times = length(Pta_Sl_Lan_2_df$Freq)), rep("La Serena", times = length(Pta_Sl_LSe_2_df$Freq)), rep("Vicuña",times = length(Pta_Sl_Vic_2_df$Freq)), rep("Pozo Almonte",times = length(Pta_Sl_Pal_2_df$Freq)))
-m$Freq <- round(m$Freq,2)
-colnames(m) <- c("Phylum","Percentage", "Sample")
-m$Sample <- factor(m$Sample, levels=c('Pozo Almonte','La Serena','Vicuña','Los Angeles'))
-sum(m$Percentage)
-```
-
-```{r}
-#pdf("Manuscript/Plots/Supplementary/fungal_phyla_Pta_soil.pdf", height = 10, width = 15)
-ggplot(m, aes(y= Percentage, x = Sample, fill = Phylum))+
-  geom_bar(stat = "identity", position = "stack", width = 0.5)+
-  geom_text(data=m, aes(x = Sample,y= Percentage, label = paste0(Percentage,"%")),
-            position = position_stack(vjust = .5),
-            colour="black", size=2.5) +
-  theme_bw() + 
-  theme(text=element_text(size = 18),
-        axis.text.x = element_text(size = 16, colour = "black"),
-        axis.text.y = element_text(size = 16, colour = "black"),
-        axis.title.x = element_blank(),
-        panel.border = element_blank(),
-        axis.line.x = element_line(colour = "black", size = 1),
-        axis.line.y = element_line(colour = "black", size = 1)) +
-  scale_fill_manual(values = Fungal_cols) + 
-  coord_flip()
-#dev.off()
-```
-
-### Heatmap 100 most abundant taxa
-``` {r echo= FALSE}
-#' Merging data
-#phy_asco <- subset_taxa(phy_obj_Fungi, Phylum == "Ascomycota")
-
-#phy_obj2 <- tax_glom(phy_asco, taxrank = "Family", NArm = FALSE)
-
-#phy_mrg <- merge_samples(phy_obj2, group = "samples_sp", fun = "mean")
-
-phy_mrg <- merge_samples(phy_obj_Fungi, group = "samples_sp", fun = "mean")
-
-phy_f100 <- row.names(tax_table(phy_mrg)[order(taxa_sums(phy_mrg),decreasing = TRUE),]) %>% head(100)
-phy_mrg <- prune_taxa(phy_f100, phy_mrg)
-
-phy_mrg <- otu_table(t(phy_mrg))
-
-phy_mrg <- as.data.frame(phy_mrg)
-
-phy_mrg <- log(phy_mrg)
-phy_mrg[phy_mrg == -Inf] <- 0
 
 phy_mrg[,"ASV"] <- rownames(phy_mrg)
 
 phy_mrg[,"taxonomy"] <- taxonomy2[rownames(taxonomy2) %in% phy_mrg$ASV,]
 
-phy_mrg[,"Order"] <- rowMeans(phy_mrg[,1:14],)
+phy_mrg[,"Order"] <- rowMeans(phy_mrg[,1:4],)
 
 phy_mrg <- phy_mrg[order(phy_mrg$Order,decreasing = TRUE),]
 ```
 
 ```{r echo= FALSE}
-max(phy_mrg[,1:13])
+max(phy_mrg[,1:4])
 
-bk = c(seq(0,2.6,length=100),seq(2.61,5.2,length=100),seq(5.21,7.8,length=100),seq(7.81,10.4,length=100),seq(10.41,13,length=100))
+mat_breaks <- quantile_breaks(as.matrix(phy_mrg[,1:4]), n = 100)
 
-colors = colorRampPalette(c("white","goldenrod1","orange","orangered", "darkred"))(length(bk)-1)
+colors = colorRampPalette(c("white","goldenrod1","orange","orangered", "darkred"))(length(mat_breaks)-1)
 
 colnames(phy_mrg)
 
 col_ann = data.frame(
-  Sample=factor(c("Root","Root","Root","Root","Root","Root",
-                  "Soil","Soil","Soil","Soil","Soil","Soil","Soil","Soil")),
-  Specie=factor(c("P_chilensis","P_chilensis","P_chilensis",
-                  "P_tamarugo","P_tamarugo","P_tamarugo",
-                  "P_chilensis","P_chilensis","P_chilensis","P_chilensis",
-                  "P_tamarugo","P_tamarugo","P_tamarugo","P_tamarugo")),
-  Soil=factor(c("La_Serena","Los_Angeles","Vicuna",
-                "La_Serena","Los_Angeles","Vicuna",
-                "La_Serena","Los_Angeles","Pozo_Almonte","Vicuna",
-                "La_Serena","Los_Angeles","Pozo_Almonte","Vicuna"))
+  Soil=factor(c("La_Serena","Los_Angeles","Pozo_Almonte","Vicuna"
+                ))
 )
 
-rownames(col_ann) = colnames(phy_mrg[,1:14])
+rownames(col_ann) = colnames(phy_mrg[,1:4])
 
-pal = list(Sample =c ("Root" = "lightgoldenrod",
-                      "Soil" = "lightgoldenrod4"),
-           Specie = c("P_chilensis" = "seagreen",
-                      "P_tamarugo" = "palegreen"),
-           Soil = c("La_Serena" = "gold",
+pal = list(Soil = c("La_Serena" = "gold",
                     "Los_Angeles" = "orange",
                     "Vicuna" = "darkgoldenrod",
                     "Pozo_Almonte" = "brown")
@@ -1035,1163 +452,423 @@ pal = list(Sample =c ("Root" = "lightgoldenrod",
 ```
 
 ``` {r echo= FALSE}
-pheatmap(phy_mrg[,c(1,3,2,9,7,10,8)], col=colors, breaks=bk,
+pheatmap(phy_mrg[,c(1:4)], breaks=mat_breaks, col=colors, 
          angle_col = 45, cellwidth = 12,
          cluster_cols = FALSE, cluster_rows = FALSE, annotation_col = col_ann, 
-         annotation_colors = pal, fontsize_col=8, fontsize_row=8, gaps_col = 3,
-         main = "100 most abundant fungal species \n P. chilensis", 
+         annotation_colors = pal, fontsize_col=8, fontsize_row=8,
+         main = "Most abundant fungal species", 
          labels_row = paste(phy_mrg$taxonomy,rownames(phy_mrg),sep = ",")
          , annotation_legend = FALSE
          , show_rownames = FALSE
          , na_col = 'gray'
-         #, cellheight = 8
-         #, filename = "Manuscript/Plots/Supplementary/dominant_families_fungi_Pc.pdf", height = 45, width = 30
-)
+         )
+```
+
+```{r}
+tmp <- prune_samples(!is.na(sample_data(phy_obj_Soils)$Specie), phy_obj_Soils) 
+adonis2(t(otu_table(tmp)) ~ Soil, data = data.frame(sample_data(phy_obj_Soils)))
+```
+```{r}
+pairwise.adonis2(t(otu_table(tmp))~Soil, data = data.frame(sample_data(tmp)))
+```
+
+## Recruitment
+#Data preparation
+```{r}
+phy_obj_F_Soil <- subset_samples(phy_obj_Fungi, Sample == "Soil")
+
+phy_FS_V <- subset_samples(phy_obj_F_Soil, Soil == "Vicuna")
+
+phy_FS_LS <- subset_samples(phy_obj_F_Soil, Soil == "La_Serena")
+
+phy_FS_LA <- subset_samples(phy_obj_F_Soil, Soil == "Los_Angeles")
+```
+
+```{r}
+phy_obj_F_Root <- subset_samples(phy_obj_Fungi, Sample == "Root")
+
+phy_FR_VPc <- subset_samples(phy_obj_F_Soil, Soil == "Vicuna")
+phy_FR_VPc <- subset_samples(phy_FR_VPc, Specie == "P_chilensis")
+
+phy_FR_LSPc <- subset_samples(phy_obj_F_Soil, Soil == "La_Serena")
+phy_FR_LSPc <- subset_samples(phy_FR_LSPc, Specie == "P_chilensis")
+
+phy_FR_LAPc <- subset_samples(phy_obj_F_Soil, Soil == "Los_Angeles")
+phy_FR_LAPc <- subset_samples(phy_FR_LAPc, Specie == "P_chilensis")
+
+phy_FR_VPt <- subset_samples(phy_obj_F_Soil, Soil == "Vicuna")
+phy_FR_VPt <- subset_samples(phy_FR_VPt, Specie == "P_tamarugo")
+
+phy_FR_LSPt <- subset_samples(phy_obj_F_Soil, Soil == "La_Serena")
+phy_FR_LSPt <- subset_samples(phy_FR_LSPt, Specie == "P_tamarugo")
+
+phy_FR_LAPt <- subset_samples(phy_obj_F_Soil, Soil == "Los_Angeles")
+phy_FR_LAPt <- subset_samples(phy_FR_LAPt, Specie == "P_tamarugo")
+```
+
+```{r}
+phy_norm_F_Soil <- subset_samples(phy_norm_Fungi, Sample == "Soil")
+
+phy_norm_FS_mrg <- merge_samples(phy_norm_F_Soil, "Soil", fun = mean)
+
+phy_norm_F_Root <- subset_samples(phy_norm_Fungi, Sample == "Root")
+
+sample_data(phy_norm_F_Root)[,"Soil_sp"] <- paste(sample_data(phy_norm_F_Root)$Soil, sample_data(phy_norm_F_Root)$Specie, sep = "_")
+
+phy_norm_FR_mrg <- merge_samples(phy_norm_F_Root, "Soil_sp", fun = mean)
+```
+
+#Vicuña
+```{r}
+common_V_VPc <- intersect(rownames(otu_table(phy_FS_V)), rownames(otu_table(phy_FR_VPc)))
+
+common_V_VPt <- intersect(rownames(otu_table(phy_FS_V)), rownames(otu_table(phy_FR_VPt)))
+
+Root_Pc_V <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_V_VPc]
+Root_Pc_V <- as.data.frame(as.matrix(Root_Pc_V)) %>% dplyr::select(Vicuna_P_chilensis)
+
+Soil_Pc_V <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_V_VPc]
+Soil_Pc_V <- as.data.frame(as.matrix(Soil_Pc_V)) %>% dplyr::select(Vicuna)
+
+Root_Pt_V <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_V_VPt]
+Root_Pt_V <- as.data.frame(as.matrix(Root_Pt_V)) %>% dplyr::select(Vicuna_P_tamarugo)
+
+Soil_Pt_V <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_V_VPt]
+Soil_Pt_V <- as.data.frame(as.matrix(Soil_Pt_V)) %>% dplyr::select(Vicuna)
+
+P_tam_v <- merge(Soil_Pt_V, Root_Pt_V, by= "row.names")
+rownames(P_tam_v) <- P_tam_v$Row.names
+P_tam_v[,"ASVs"] <- P_tam_v$Row.names
+P_tam_v$ASVs <- as.factor(P_tam_v$ASVs)
+P_tam_v[,"Delta"] <- P_tam_v$Vicuna_P_tamarugo-P_tam_v$Vicuna
+P_tam_v <- P_tam_v[,-1]
+
+P_tam_v <- merge(P_tam_v,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_tam_v, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Vicuña") +
+  scale_y_discrete(labels=paste(P_tam_v$Kingdom,P_tam_v$Phylum,P_tam_v$Class,P_tam_v$Order,P_tam_v$Family,P_tam_v$Genus,P_tam_v$Specie,P_tam_v$ASVs))
+
+length(P_tam_v$Delta[P_tam_v$Delta==0])
+length(P_tam_v$Delta[P_tam_v$Delta>0])
+length(P_tam_v$Delta[P_tam_v$Delta<0])
+
+P_chil_v <- merge(Soil_Pc_V, Root_Pc_V, by= "row.names")
+rownames(P_chil_v) <- P_chil_v$Row.names
+P_chil_v[,"ASVs"] <- P_chil_v$Row.names
+P_chil_v$ASVs <- as.factor(P_chil_v$ASVs)
+P_chil_v[,"Delta"] <- P_chil_v$Vicuna_P_chilensis-P_chil_v$Vicuna
+P_chil_v <- P_chil_v[,-1]
+
+P_chil_v <- merge(P_chil_v,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_chil_v, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Vicuña") +
+  scale_y_discrete(labels=paste(P_chil_v$Kingdom,P_chil_v$Phylum,P_chil_v$Class,P_chil_v$Order,P_chil_v$Family,P_chil_v$Genus,P_chil_v$Specie,P_chil_v$ASVs))
+
+length(P_chil_v$Delta[P_chil_v$Delta==0])
+length(P_chil_v$Delta[P_chil_v$Delta>0])
+length(P_chil_v$Delta[P_chil_v$Delta<0])
+
+df1 <- P_tam_v[order(abs(P_tam_v$Delta),decreasing = TRUE),] %>% head(30)
+df2 <- P_chil_v[order(abs(P_chil_v$Delta),decreasing = TRUE),] %>% head(30)
+
+df3 <- union(df1$Row.names,df2$Row.names)
+df1 <- P_tam_v[P_tam_v$Row.names %in% df3,]
+df2 <- P_chil_v[P_chil_v$Row.names %in% df3,]
+
+p1 <- ggplot(df2, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Vicuña") +
+  scale_y_discrete(labels=paste(df2$Kingdom,df2$Phylum,df2$Class,df2$Order,df2$Family,df2$Genus,df2$Specie,df2$ASVs))
+
+p2 <- ggplot(df1, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Vicuña") +
+  scale_y_discrete(labels=paste(df1$Kingdom,df1$Phylum,df1$Class,df1$Order,df1$Family,df1$Genus,df1$Specie,df1$ASVs))
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+## venn diagram
+```{r}
+#higher than zero
+P_tam_V_hz <- P_tam_v %>% filter(Delta > 0)
+P_tam_V_hz <- P_tam_V_hz$Row.names
+
+P_chil_v_hz <- P_chil_v %>% filter(Delta > 0)
+P_chil_v_hz <- P_chil_v_hz$Row.names
+
+plot.new()
+suppressWarnings(grid.draw(venn.diagram(
+  list(P_tam_V_hz=P_tam_V_hz,P_chil_v_hz=P_chil_v_hz),
+  filename=NULL, col=c("yellowgreen","green"), margin=c(0.35,0.35,0.35,0.35),
+  category.names=c("P.tamarugo","P.chilensis"))))
+
+#equal to zero
+P_tam_V_ez <- P_tam_v %>% filter(Delta == 0)
+P_tam_V_ez <- P_tam_V_ez$Row.names
+
+P_chil_v_ez <- P_chil_v %>% filter(Delta == 0)
+P_chil_v_ez <- P_chil_v_ez$Row.names
+
+#lower than zero
+P_tam_V_lz <- P_tam_v %>% filter(Delta < 0)
+P_tam_V_lz <- P_tam_V_lz$Row.names
+
+P_chil_v_lz <- P_chil_v %>% filter(Delta < 0)
+P_chil_v_lz <- P_chil_v_lz$Row.names
+```
+
+#La Serena
+```{r}
+common_LS_LSPc <- intersect(rownames(otu_table(phy_FS_LS)), rownames(otu_table(phy_FR_LSPc)))
+
+common_LS_LSPt <- intersect(rownames(otu_table(phy_FS_LS)), rownames(otu_table(phy_FR_LSPt)))
+
+Root_Pc_LS <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_LS_LSPc]
+Root_Pc_LS <- as.data.frame(as.matrix(Root_Pc_LS)) %>% dplyr::select(La_Serena_P_chilensis)
+
+Soil_Pc_LS <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_LS_LSPc]
+Soil_Pc_LS <- as.data.frame(as.matrix(Soil_Pc_LS)) %>% dplyr::select(La_Serena)
+
+Root_Pt_LS <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_LS_LSPt]
+Root_Pt_LS <- as.data.frame(as.matrix(Root_Pt_LS)) %>% dplyr::select(La_Serena_P_tamarugo)
+
+Soil_Pt_LS <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_LS_LSPt]
+Soil_Pt_LS <- as.data.frame(as.matrix(Soil_Pt_LS)) %>% dplyr::select(La_Serena)
+
+P_tam_LS <- merge(Soil_Pt_LS, Root_Pt_LS, by= "row.names")
+rownames(P_tam_LS) <- P_tam_LS$Row.names
+P_tam_LS[,"ASVs"] <- P_tam_LS$Row.names
+P_tam_LS$ASVs <- as.factor(P_tam_LS$ASVs)
+P_tam_LS[,"Delta"] <- P_tam_LS$La_Serena_P_tamarugo-P_tam_LS$La_Serena
+P_tam_LS <- P_tam_LS[,-1]
+
+P_tam_LS <- merge(P_tam_LS,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_tam_LS, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment La Serena") +
+  scale_y_discrete(labels=paste(P_tam_LS$Kingdom,P_tam_LS$Phylum,P_tam_LS$Class,P_tam_LS$Order,P_tam_LS$Family,P_tam_LS$Genus,P_tam_LS$Specie,P_tam_LS$ASVs))
+
+length(P_tam_LS$Delta[P_tam_LS$Delta==0])
+length(P_tam_LS$Delta[P_tam_LS$Delta>0])
+length(P_tam_LS$Delta[P_tam_LS$Delta<0])
+
+P_chil_LS <- merge(Soil_Pc_LS, Root_Pc_LS, by= "row.names")
+rownames(P_chil_LS) <- P_chil_LS$Row.names
+P_chil_LS[,"ASVs"] <- P_chil_LS$Row.names
+P_chil_LS$ASVs <- as.factor(P_chil_LS$ASVs)
+P_chil_LS[,"Delta"] <- P_chil_LS$La_Serena_P_chilensis-P_chil_LS$La_Serena
+P_chil_LS <- P_chil_LS[,-1]
+
+P_chil_LS <- merge(P_chil_LS,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_chil_LS, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment La Serena") +
+  scale_y_discrete(labels=paste(P_chil_LS$Kingdom,P_chil_LS$Phylum,P_chil_LS$Class,P_chil_LS$Order,P_chil_LS$Family,P_chil_LS$Genus,P_chil_LS$Specie,P_chil_LS$ASVs))
+
+length(P_chil_LS$Delta[P_chil_LS$Delta==0])
+length(P_chil_LS$Delta[P_chil_LS$Delta>0])
+length(P_chil_LS$Delta[P_chil_LS$Delta<0])
+
+df1 <- P_tam_LS[order(abs(P_tam_LS$Delta),decreasing = TRUE),] %>% head(30)
+df2 <- P_chil_LS[order(abs(P_chil_LS$Delta),decreasing = TRUE),] %>% head(30)
+
+df3 <- union(df1$Row.names,df2$Row.names)
+df1 <- P_tam_LS[P_tam_LS$Row.names %in% df3,]
+df2 <- P_chil_LS[P_chil_LS$Row.names %in% df3,]
+
+p1 <- ggplot(df2, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment La Serena") +
+  scale_y_discrete(labels=paste(df2$Kingdom,df2$Phylum,df2$Class,df2$Order,df2$Family,df2$Genus,df2$Specie,df2$ASVs))
+
+p2 <- ggplot(df1, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment La Serena") +
+  scale_y_discrete(labels=paste(df1$Kingdom,df1$Phylum,df1$Class,df1$Order,df1$Family,df1$Genus,df1$Specie,df1$ASVs))
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+##venn diagram
+```{r}
+#higher than zero
+P_tam_LS_hz <- P_tam_LS %>% filter(Delta > 0)
+P_tam_LS_hz <- P_tam_LS_hz$Row.names
+
+P_chil_LS_hz <- P_chil_LS %>% filter(Delta > 0)
+P_chil_LS_hz <- P_chil_LS_hz$Row.names
+
+plot.new()
+suppressWarnings(grid.draw(venn.diagram(
+  list(P_tam_LS_hz=P_tam_LS_hz,P_chil_LS_hz=P_chil_LS_hz),
+  filename=NULL, col=c("yellowgreen","green"), margin=c(0.35,0.35,0.35,0.35),
+  category.names=c("P.tamarugo","P.chilensis"))))
+
+#equal to zero
+P_tam_LS_ez <- P_tam_LS %>% filter(Delta == 0)
+P_tam_LS_ez <- P_tam_LS_ez$Row.names
+
+P_chil_LS_ez <- P_chil_LS %>% filter(Delta == 0)
+P_chil_LS_ez <- P_chil_LS_ez$Row.names
+
+#equal to zero
+P_tam_LS_lz <- P_tam_LS %>% filter(Delta < 0)
+P_tam_LS_lz <- P_tam_LS_lz$Row.names
+
+P_chil_LS_lz <- P_chil_LS %>% filter(Delta < 0)
+P_chil_LS_lz <- P_chil_LS_lz$Row.names
+```
+
+#Los Angeles
+```{r}
+common_LA_LAPc <- intersect(rownames(otu_table(phy_FS_LA)), rownames(otu_table(phy_FR_LAPc)))
+
+common_LA_LAPt <- intersect(rownames(otu_table(phy_FS_LA)), rownames(otu_table(phy_FR_LAPt)))
+
+Root_Pc_LA <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_LA_LAPc]
+Root_Pc_LA <- as.data.frame(as.matrix(Root_Pc_LA)) %>% dplyr::select(Los_Angeles_P_chilensis)
+
+Soil_Pc_LA <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_LA_LAPc]
+Soil_Pc_LA <- as.data.frame(as.matrix(Soil_Pc_LA)) %>% dplyr::select(Los_Angeles)
+
+Root_Pt_LA <- t(otu_table(phy_norm_FR_mrg))[colnames(otu_table(phy_norm_FR_mrg)) %in% common_LA_LAPt]
+Root_Pt_LA <- as.data.frame(as.matrix(Root_Pt_LA)) %>% dplyr::select(Los_Angeles_P_tamarugo)
+
+Soil_Pt_LA <- t(otu_table(phy_norm_FS_mrg))[colnames(otu_table(phy_norm_FS_mrg)) %in% common_LA_LAPt]
+Soil_Pt_LA <- as.data.frame(as.matrix(Soil_Pt_LA)) %>% dplyr::select(Los_Angeles)
+
+P_tam_LA <- merge(Soil_Pt_LA, Root_Pt_LA, by= "row.names")
+rownames(P_tam_LA) <- P_tam_LA$Row.names
+P_tam_LA[,"ASVs"] <- P_tam_LA$Row.names
+P_tam_LA$ASVs <- as.factor(P_tam_LA$ASVs)
+P_tam_LA[,"Delta"] <- P_tam_LA$Los_Angeles_P_tamarugo-P_tam_LA$Los_Angeles
+P_tam_LA <- P_tam_LA[,-1]
+
+P_tam_LA <- merge(P_tam_LA,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_tam_LA, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Los Angeles") +
+  scale_y_discrete(labels=paste(P_tam_LA$Kingdom,P_tam_LA$Phylum,P_tam_LA$Class,P_tam_LA$Order,P_tam_LA$Family,P_tam_LA$Genus,P_tam_LA$Specie,P_tam_LA$ASVs))
+
+length(P_tam_LA$Delta[P_tam_LA$Delta==0])
+length(P_tam_LA$Delta[P_tam_LA$Delta>0])
+length(P_tam_LA$Delta[P_tam_LA$Delta<0])
+
+P_chil_LA <- merge(Soil_Pc_LA, Root_Pc_LA, by= "row.names")
+rownames(P_chil_LA) <- P_chil_LA$Row.names
+P_chil_LA[,"ASVs"] <- P_chil_LA$Row.names
+P_chil_LA$ASVs <- as.factor(P_chil_LA$ASVs)
+P_chil_LA[,"Delta"] <- P_chil_LA$Los_Angeles_P_chilensis-P_chil_LA$Los_Angeles
+P_chil_LA <- P_chil_LA[,-1]
+
+P_chil_LA <- merge(P_chil_LA,tax_table(phy_norm_FR_mrg), by = "row.names")
+
+ggplot(P_chil_LA, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  theme(axis.text = element_blank()) +
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Los Angeles") +
+  scale_y_discrete(labels=paste(P_chil_LA$Kingdom,P_chil_LA$Phylum,P_chil_LA$Class,P_chil_LA$Order,P_chil_LA$Family,P_chil_LA$Genus,P_chil_LA$Specie,P_chil_LA$ASVs))
+
+length(P_chil_LA$Delta[P_chil_LA$Delta==0])
+length(P_chil_LA$Delta[P_chil_LA$Delta>0])
+length(P_chil_LA$Delta[P_chil_LA$Delta<0])
+
+df1 <- P_tam_LA[order(abs(P_tam_LA$Delta),decreasing = TRUE),] %>% head(30)
+df2 <- P_chil_LA[order(abs(P_chil_LA$Delta),decreasing = TRUE),] %>% head(30)
+
+df3 <- union(df1$Row.names,df2$Row.names)
+df1 <- P_tam_LA[P_tam_LA$Row.names %in% df3,]
+df2 <- P_chil_LA[P_chil_LA$Row.names %in% df3,]
+
+p1 <- ggplot(df2, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. chilensis recruitment Los Angeles") +
+  scale_y_discrete(labels=paste(df2$Kingdom,df2$Phylum,df2$Class,df2$Order,df2$Family,df2$Genus,df2$Specie,df2$ASVs))
+
+p2 <- ggplot(df1, aes(Delta,ASVs, color = Delta)) +
+  theme_bw() + 
+  scale_colour_gradient2(midpoint = 0, limits = c(-5, 3), low = "blue", mid = "gray", high = "red") +
+  geom_point() + geom_point(size = 5.5) + xlim(-5, 3) +
+  ggtitle("P. tamarugo recruitment Los Angeles") +
+  scale_y_discrete(labels=paste(df1$Kingdom,df1$Phylum,df1$Class,df1$Order,df1$Family,df1$Genus,df1$Specie,df1$ASVs))
+
+grid.arrange(p1, p2, ncol=2)
+```
+
+##venn diagram
+```{r}
+#higher than zero
+P_tam_LA_hz <- P_tam_LA %>% filter(Delta > 0)
+P_tam_LA_hz <- P_tam_LA_hz$Row.names
+
+P_chil_LA_hz <- P_chil_LA %>% filter(Delta > 0)
+P_chil_LA_hz <- P_chil_LA_hz$Row.names
+
+#pdf("Manuscript/Plots/Supplementary/Venn_LA_fungi_hz.pdf", width = 10, height = 10)
+plot.new()
+suppressWarnings(grid.draw(venn.diagram(
+  list(P_tam_LA_hz=P_tam_LA_hz,P_chil_LA_hz=P_chil_LA_hz),
+  filename=NULL, col=c("yellowgreen","green"), margin=c(0.35,0.35,0.35,0.35),
+  category.names=c("P.tamarugo","P.chilensis"))))
 #dev.off()
+
+#equal to zero
+P_tam_LA_ez <- P_tam_LA %>% filter(Delta == 0)
+P_tam_LA_ez <- P_tam_LA_ez$Row.names
+
+P_chil_LA_ez <- P_chil_LA %>% filter(Delta == 0)
+P_chil_LA_ez <- P_chil_LA_ez$Row.names
+
+#lower than zero
+P_tam_LA_lz <- P_tam_LA %>% filter(Delta < 0)
+P_tam_LA_lz <- P_tam_LA_lz$Row.names
+
+P_chil_LA_lz <- P_chil_LA %>% filter(Delta < 0)
+P_chil_LA_lz <- P_chil_LA_lz$Row.names
 ```
 
-``` {r echo= FALSE}
-pheatmap(phy_mrg[,c(4,6,5,13,11,14,12)], col=colors, breaks=bk,
-         angle_col = 45, cellwidth = 12,
-         cluster_cols = FALSE, cluster_rows = FALSE, annotation_col = col_ann, 
-         annotation_colors = pal, fontsize_col=8, fontsize_row=8, gaps_col = 3,
-         main = "100 most abundant fungal species \n P. tamarugo", 
-         labels_row = paste(phy_mrg$taxonomy,rownames(phy_mrg),sep = ",")
-         , annotation_legend = FALSE
-         , show_rownames = FALSE
-         , na_col = 'gray'
-         #, cellheight = 8
-         #, filename = "Manuscript/Plots/Supplementary/dominant_families_fungi_Pt.pdf", height = 45, width = 30
-)
-#dev.off()
-```
 
-``` {r echo= FALSE}
-pheatmap(phy_mrg[,c(1,3,2,4,6,5,9,7,10,8,13,11,14,12)], col=colors, breaks=bk,
-         angle_col = 45, cellwidth = 12,
-         cluster_cols = FALSE, cluster_rows = FALSE, annotation_col = col_ann, 
-         annotation_colors = pal, fontsize_col=8, fontsize_row=8, gaps_col = c(3,6,10),
-         main = "100 most abundant fungal species", 
-         labels_row = paste(phy_mrg$taxonomy,rownames(phy_mrg),sep = ",")
-         , annotation_legend = FALSE
-         , show_rownames = FALSE
-         , na_col = 'gray'
-         #, cellheight = 8
-         #, filename = "Manuscript/Plots/Supplementary/100_dominant_fungi.pdf", height = 45, width = 30
-)
-#dev.off()
-```
 
-## Differentially abundant taxa
-Preparing DESeq object from phyloseq
-```{r}
-sample_data(phy_obj_Fungi)[,"Sample_type"] <- paste(sample_data(phy_obj_Fungi)$Specie,sample_data(phy_obj_Fungi)$Soil,sample_data(phy_obj_Fungi)$Sample,sep = "_")
-diagdds = phyloseq_to_deseq2(phy_obj_Fungi, ~ Sample_type)
-diagdds = DESeq(diagdds, test="Wald", fitType="mean", sfType="poscount")
-```
 
-###Pozo Almonte
-```{r}
-sample_data(phy_norm)[,"Sample_type"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Soil,sample_data(phy_norm)$Sample,sep = "_")
-phy_mrg <- merge_samples(phy_norm, group = "Sample_type", fun = "mean")
 
-resP_Al <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Pozo_Almonte_Soil", "P_tamarugo_Pozo_Almonte_Soil"))
-sigtab_PA = cbind(as(resP_Al, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_Al), ], "matrix"))
-sigtab_PA <- subset(sigtab_PA, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_PA$ASV = rownames(sigtab_PA)
 
 
-diff_taxa <- row.names(sigtab_PA[order(sigtab_PA$log2FoldChange),])
-sigtab <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(sigtab)
-max(otu_table(sigtab))
 
-tax <- as.data.frame(tax_table(sigtab))
-sigtab <- as.data.frame(t(otu_table(sigtab)))
-
-sigtab[,"ASV"] <- rownames(sigtab)
-tax[,"ASV"] <- rownames(tax)
-sigtab <- join(sigtab, tax, by= "ASV", type = "left")
-rownames(sigtab) <- sigtab$ASV
-
-sigtab <- mutate(sigtab, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-
-#pdf(file = "Manuscript/Plots/Fungi_Pal.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(sigtab[,c(5,12)]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = bluered,
-          cexRow = .2, cexCol = .5, offsetRow = -1, scale="column",
-          tracecol = 'black', labRow = sigtab$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Prosopis chilensis")
-```
-###Vicuna
-```{r}
-resP_ch_V <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Vicuna_Root", "P_chilensis_Vicuna_Soil"))
-sigtab_Pch = cbind(as(resP_ch_V, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_V), ], "matrix"))
-sigtab_Pch <- subset(sigtab_Pch, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pch$ASV = rownames(sigtab_Pch)
-
-resP_ta_V <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Vicuna_Root", "P_tamarugo_Vicuna_Soil"))
-sigtab_Pta = cbind(as(resP_ta_V, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_V), ], "matrix"))
-sigtab_Pta <- subset(sigtab_Pta, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pta$ASV = rownames(sigtab_Pta)
-
-sigtab_V <- join_all(list(sigtab_Pch,sigtab_Pta), by ="ASV", type = "full")
-rownames(sigtab_V) <- sigtab_V$ASV
-
-diff_taxa <- row.names(sigtab_V[order(sigtab_V$log2FoldChange),])
-sigtab <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(sigtab)
-max(otu_table(sigtab))
-
-tax <- as.data.frame(tax_table(sigtab))
-sigtab <- as.data.frame(t(otu_table(sigtab)))
-
-sigtab[,"ASV"] <- rownames(sigtab)
-tax[,"ASV"] <- rownames(tax)
-sigtab <- join(sigtab, tax, by= "ASV", type = "left")
-rownames(sigtab) <- sigtab$ASV
-
-sigtab <- mutate(sigtab, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-
-#pdf(file = "Manuscript/Plots/Fungi_Vic.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(sigtab[,c(6,7,13,14)]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = bluered,
-          cexRow = .2, cexCol = .5, offsetRow = -1, scale="column",
-          tracecol = 'black', labRow = sigtab$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Vicuña")
-```
-
-###La Serena
-```{r}
-resP_ch_LS <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Root", "P_chilensis_La_Serena_Soil"))
-sigtab_Pch = cbind(as(resP_ch_LS, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_LS), ], "matrix"))
-sigtab_Pch <- subset(sigtab_Pch, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pch$ASV = rownames(sigtab_Pch)
-
-resP_ta_LS <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Root", "P_tamarugo_La_Serena_Soil"))
-sigtab_Pta = cbind(as(resP_ta_LS, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_LS), ], "matrix"))
-sigtab_Pta <- subset(sigtab_Pta, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pta$ASV = rownames(sigtab_Pta)
-
-sigtab_LS <- join_all(list(sigtab_Pch,sigtab_Pta), by ="ASV", type = "full")
-rownames(sigtab_LS) <- sigtab_LS$ASV
-
-diff_taxa <- row.names(sigtab_LS[order(sigtab_LS$log2FoldChange),])
-sigtab <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(sigtab)
-max(otu_table(sigtab))
-
-tax <- as.data.frame(tax_table(sigtab))
-sigtab <- as.data.frame(t(otu_table(sigtab)))
-
-sigtab[,"ASV"] <- rownames(sigtab)
-tax[,"ASV"] <- rownames(tax)
-sigtab <- join(sigtab, tax, by= "ASV", type = "left")
-rownames(sigtab) <- sigtab$ASV
-
-sigtab <- mutate(sigtab, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-
-#pdf(file = "Manuscript/Plots/Fungi_LSe.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(sigtab[,c(1,2,8,9)]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = bluered,
-          cexRow = .2, cexCol = .5, offsetRow = -1, scale="column",
-          tracecol = 'black', labRow = sigtab$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n La Serena")
-```
-
-###Los Angeles
-```{r}
-resP_ch_LA <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Root", "P_chilensis_Los_Angeles_Soil"))
-sigtab_Pch = cbind(as(resP_ch_LA, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_LA), ], "matrix"))
-sigtab_Pch <- subset(sigtab_Pch, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pch$ASV = rownames(sigtab_Pch)
-
-resP_ta_LA <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Root", "P_tamarugo_Los_Angeles_Soil"))
-sigtab_Pta = cbind(as(resP_ta_LA, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_LA), ], "matrix"))
-sigtab_Pta <- subset(sigtab_Pta, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtab_Pta$ASV = rownames(sigtab_Pta)
-
-sigtab_LA <- join_all(list(sigtab_Pch,sigtab_Pta), by ="ASV", type = "full")
-rownames(sigtab_LA) <- sigtab_LA$ASV
-
-diff_taxa <- row.names(sigtab_LA[order(sigtab_LA$log2FoldChange),])
-sigtab <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(sigtab)
-max(otu_table(sigtab))
-
-tax <- as.data.frame(tax_table(sigtab))
-sigtab <- as.data.frame(t(otu_table(sigtab)))
-
-sigtab[,"ASV"] <- rownames(sigtab)
-tax[,"ASV"] <- rownames(tax)
-sigtab <- join(sigtab, tax, by= "ASV", type = "left")
-rownames(sigtab) <- sigtab$ASV
-
-sigtab <- mutate(sigtab, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-
-#pdf(file = "Manuscript/Plots/Fungi_LAn.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(sigtab[,c(3,4,10,11)]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = bluered,
-          cexRow = .2, cexCol = .5, offsetRow = -1, scale="column",
-          tracecol = 'black', labRow = sigtab$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Los Angeles")
-```
-
-###All
-```{r}
-sigtab <- join_all(list(sigtab_V,sigtab_LS,sigtab_LA), by ="ASV", type = "full")
-rownames(sigtab) <- sigtab$ASV
-
-diff_taxa <- row.names(sigtab[order(sigtab$log2FoldChange),])
-sigtab <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(sigtab)
-max(otu_table(sigtab))
-
-tax <- as.data.frame(tax_table(sigtab))
-sigtab <- as.data.frame(t(otu_table(sigtab)))
-
-sigtab[,"ASV"] <- rownames(sigtab)
-tax[,"ASV"] <- rownames(tax)
-sigtab <- join(sigtab, tax, by= "ASV", type = "left")
-rownames(sigtab) <- sigtab$ASV
-
-sigtab <- mutate(sigtab, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-
-#pdf(file = "Manuscript/Plots/Fungi_all.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(sigtab[,c(1,2,8,9,6,7,13,14,3,4,10,11)]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = bluered, breaks = 300,
-          cexRow = .2, cexCol = .5, offsetRow = -1, scale="column",
-          tracecol = 'black', labRow = sigtab$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n All samples")
-```
-
-Preparing results. Pairwise comparison between treatment and tissue, between block soils and edges and between edges.
-```{r}
-resultsNames(diagdds)
-#P_chilensis
-#soil vs soil
-resP_ch_S1 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Los_Angeles_Soil"))
-resP_ch_S2 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Vicuna_Soil"))
-resP_ch_S3 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Pozo_Almonte_Soil"))
-resP_ch_S4 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Soil", "P_chilensis_Pozo_Almonte_Soil"))
-resP_ch_S5 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Vicuna_Soil"))
-resP_ch_S6 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Pozo_Almonte_Soil", "P_chilensis_Vicuna_Soil"))
-
-#root vs root
-resP_ch_R1 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Root", "P_chilensis_Los_Angeles_Root"))
-resP_ch_R2 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Root", "P_chilensis_Vicuna_Root"))
-resP_ch_R3 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Root", "P_chilensis_Vicuna_Root"))
-
-#soil vs root
-resP_ch_SR1 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_La_Serena_Root"))
-resP_ch_SR2 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Los_Angeles_Root"))
-resP_ch_SR3 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_La_Serena_Soil", "P_chilensis_Vicuna_Root"))
-resP_ch_SR4 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Soil", "P_chilensis_La_Serena_Root"))
-resP_ch_SR5 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Soil", "P_chilensis_Los_Angeles_Root"))
-resP_ch_SR6 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Los_Angeles_Soil", "P_chilensis_Vicuna_Root"))
-resP_ch_SR7 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Vicuna_Soil", "P_chilensis_La_Serena_Root"))
-resP_ch_SR8 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Vicuna_Soil", "P_chilensis_Los_Angeles_Root"))
-resP_ch_SR9 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Vicuna_Soil", "P_chilensis_Vicuna_Root"))
-resP_ch_SR10 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Pozo_Almonte_Soil", "P_chilensis_La_Serena_Root"))
-resP_ch_SR11 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Pozo_Almonte_Soil", "P_chilensis_Los_Angeles_Root"))
-resP_ch_SR12 <- results(diagdds, contrast = c("Sample_type", "P_chilensis_Pozo_Almonte_Soil", "P_chilensis_Vicuna_Root"))
-
-#P_tamarugo
-#soil vs soil
-resP_ta_S1 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Los_Angeles_Soil"))
-resP_ta_S2 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Vicuna_Soil"))
-resP_ta_S3 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Pozo_Almonte_Soil"))
-resP_ta_S4 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Soil", "P_tamarugo_Pozo_Almonte_Soil"))
-resP_ta_S5 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Vicuna_Soil"))
-resP_ta_S6 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Pozo_Almonte_Soil", "P_tamarugo_Vicuna_Soil"))
-
-#root vs root
-resP_ta_R1 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Root", "P_tamarugo_Los_Angeles_Root"))
-resP_ta_R2 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Root", "P_tamarugo_Vicuna_Root"))
-resP_ta_R3 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Root", "P_tamarugo_Vicuna_Root"))
-
-#soil vs root
-resP_ta_SR1 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_La_Serena_Root"))
-resP_ta_SR2 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Los_Angeles_Root"))
-resP_ta_SR3 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_La_Serena_Soil", "P_tamarugo_Vicuna_Root"))
-resP_ta_SR4 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Soil", "P_tamarugo_La_Serena_Root"))
-resP_ta_SR5 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Soil", "P_tamarugo_Los_Angeles_Root"))
-resP_ta_SR6 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Los_Angeles_Soil", "P_tamarugo_Vicuna_Root"))
-resP_ta_SR7 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Vicuna_Soil", "P_tamarugo_La_Serena_Root"))
-resP_ta_SR8 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Vicuna_Soil", "P_tamarugo_Los_Angeles_Root"))
-resP_ta_SR9 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Vicuna_Soil", "P_tamarugo_Vicuna_Root"))
-resP_ta_SR10 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Pozo_Almonte_Soil", "P_tamarugo_La_Serena_Root"))
-resP_ta_SR11 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Pozo_Almonte_Soil", "P_tamarugo_Los_Angeles_Root"))
-resP_ta_SR12 <- results(diagdds, contrast = c("Sample_type", "P_tamarugo_Pozo_Almonte_Soil", "P_tamarugo_Vicuna_Root"))
-```
-
-``` {r echo= FALSE}
-#P_chilensis
-#soil vs soil
-sigtabP_ch_S1 = cbind(as(resP_ch_S1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S1), ], "matrix"))
-sigtabP_ch_S2 = cbind(as(resP_ch_S2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S2), ], "matrix"))
-sigtabP_ch_S3 = cbind(as(resP_ch_S3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S3), ], "matrix"))
-sigtabP_ch_S4 = cbind(as(resP_ch_S4, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S4), ], "matrix"))
-sigtabP_ch_S5 = cbind(as(resP_ch_S5, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S5), ], "matrix"))
-sigtabP_ch_S6 = cbind(as(resP_ch_S6, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_S6), ], "matrix"))
-
-#root vs root
-sigtabP_ch_R1 = cbind(as(resP_ch_R1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_R1), ], "matrix"))
-sigtabP_ch_R2 = cbind(as(resP_ch_R2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_R2), ], "matrix"))
-sigtabP_ch_R3 = cbind(as(resP_ch_R3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_R3), ], "matrix"))
-
-#soil vs root
-sigtabP_ch_SR1 = cbind(as(resP_ch_SR1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR1), ], "matrix"))
-sigtabP_ch_SR2 = cbind(as(resP_ch_SR2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR2), ], "matrix"))
-sigtabP_ch_SR3 = cbind(as(resP_ch_SR3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR3), ], "matrix"))
-sigtabP_ch_SR4 = cbind(as(resP_ch_SR4, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR4), ], "matrix"))
-sigtabP_ch_SR5 = cbind(as(resP_ch_SR5, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR5), ], "matrix"))
-sigtabP_ch_SR6 = cbind(as(resP_ch_SR6, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR6), ], "matrix"))
-sigtabP_ch_SR7 = cbind(as(resP_ch_SR7, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR7), ], "matrix"))
-sigtabP_ch_SR8 = cbind(as(resP_ch_SR8, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR8), ], "matrix"))
-sigtabP_ch_SR9 = cbind(as(resP_ch_SR9, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR9), ], "matrix"))
-sigtabP_ch_SR10 = cbind(as(resP_ch_SR10, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR10), ], "matrix"))
-sigtabP_ch_SR11 = cbind(as(resP_ch_SR11, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR11), ], "matrix"))
-sigtabP_ch_SR12 = cbind(as(resP_ch_SR12, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ch_SR12), ], "matrix"))
-
-#P_tamarugo
-#soil vs soil
-sigtabP_ta_S1 = cbind(as(resP_ta_S1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S1), ], "matrix"))
-sigtabP_ta_S2 = cbind(as(resP_ta_S2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S2), ], "matrix"))
-sigtabP_ta_S3 = cbind(as(resP_ta_S3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S3), ], "matrix"))
-sigtabP_ta_S4 = cbind(as(resP_ta_S4, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S4), ], "matrix"))
-sigtabP_ta_S5 = cbind(as(resP_ta_S5, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S5), ], "matrix"))
-sigtabP_ta_S6 = cbind(as(resP_ta_S6, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_S6), ], "matrix"))
-
-#root vs root
-sigtabP_ta_R1 = cbind(as(resP_ta_R1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_R1), ], "matrix"))
-sigtabP_ta_R2 = cbind(as(resP_ta_R2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_R2), ], "matrix"))
-sigtabP_ta_R3 = cbind(as(resP_ta_R3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_R3), ], "matrix"))
-
-#soil vs root
-sigtabP_ta_SR1 = cbind(as(resP_ta_SR1, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR1), ], "matrix"))
-sigtabP_ta_SR2 = cbind(as(resP_ta_SR2, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR2), ], "matrix"))
-sigtabP_ta_SR3 = cbind(as(resP_ta_SR3, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR3), ], "matrix"))
-sigtabP_ta_SR4 = cbind(as(resP_ta_SR4, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR4), ], "matrix"))
-sigtabP_ta_SR5 = cbind(as(resP_ta_SR5, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR5), ], "matrix"))
-sigtabP_ta_SR6 = cbind(as(resP_ta_SR6, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR6), ], "matrix"))
-sigtabP_ta_SR7 = cbind(as(resP_ta_SR7, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR7), ], "matrix"))
-sigtabP_ta_SR8 = cbind(as(resP_ta_SR8, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR8), ], "matrix"))
-sigtabP_ta_SR9 = cbind(as(resP_ta_SR9, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR9), ], "matrix"))
-sigtabP_ta_SR10 = cbind(as(resP_ta_SR10, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR10), ], "matrix"))
-sigtabP_ta_SR11 = cbind(as(resP_ta_SR11, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR11), ], "matrix"))
-sigtabP_ta_SR12 = cbind(as(resP_ta_SR12, "data.frame"), as(tax_table(phy_obj_Fungi)[rownames(resP_ta_SR12), ], "matrix"))
-```
-
-setting thresholds, adjusted p-value lower or equal to 0.01 and log2fold change higher or equal to .5
-```{r}
-#P_chilensis
-#soil vs soil
-sigtabP_ch_S1 <- subset(sigtabP_ch_S1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_S2 <- subset(sigtabP_ch_S2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_S3 <- subset(sigtabP_ch_S3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_S4 <- subset(sigtabP_ch_S4, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_S5 <- subset(sigtabP_ch_S5, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_S6 <- subset(sigtabP_ch_S6, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-
-#root vs root
-sigtabP_ch_R1 <- subset(sigtabP_ch_R1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_R2 <- subset(sigtabP_ch_R2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_R3 <- subset(sigtabP_ch_R3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-
-#soil vs root
-sigtabP_ch_SR1 <- subset(sigtabP_ch_SR1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR2 <- subset(sigtabP_ch_SR2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR3 <- subset(sigtabP_ch_SR3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR4 <- subset(sigtabP_ch_SR4, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR5 <- subset(sigtabP_ch_SR5, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR6 <- subset(sigtabP_ch_SR6, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR7 <- subset(sigtabP_ch_SR7, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR8 <- subset(sigtabP_ch_SR8, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR9 <- subset(sigtabP_ch_SR9, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR10 <- subset(sigtabP_ch_SR10, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR11 <- subset(sigtabP_ch_SR11, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ch_SR12 <- subset(sigtabP_ch_SR12, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-
-#P_tamarugo
-#soil vs soil
-sigtabP_ta_S1 <- subset(sigtabP_ta_S1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_S2 <- subset(sigtabP_ta_S2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_S3 <- subset(sigtabP_ta_S3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_S4 <- subset(sigtabP_ta_S4, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_S5 <- subset(sigtabP_ta_S5, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_S6 <- subset(sigtabP_ta_S6, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-
-#root vs root
-sigtabP_ta_R1 <- subset(sigtabP_ta_R1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_R2 <- subset(sigtabP_ta_R2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_R3 <- subset(sigtabP_ta_R3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-
-#soil vs root
-sigtabP_ta_SR1 <- subset(sigtabP_ta_SR1, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR2 <- subset(sigtabP_ta_SR2, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR3 <- subset(sigtabP_ta_SR3, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR4 <- subset(sigtabP_ta_SR4, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR5 <- subset(sigtabP_ta_SR5, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR6 <- subset(sigtabP_ta_SR6, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR7 <- subset(sigtabP_ta_SR7, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR8 <- subset(sigtabP_ta_SR8, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR9 <- subset(sigtabP_ta_SR9, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR10 <- subset(sigtabP_ta_SR10, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR11 <- subset(sigtabP_ta_SR11, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-sigtabP_ta_SR12 <- subset(sigtabP_ta_SR12, padj <= 0.01 & abs(log2FoldChange) >= 0.5)
-```
-
-```{r echo= FALSE}
-#P_chilensis
-#soil vs soil
-sigtabP_ch_S1$ASV = rownames(sigtabP_ch_S1)
-sigtabP_ch_S2$ASV = rownames(sigtabP_ch_S2)
-sigtabP_ch_S3$ASV = rownames(sigtabP_ch_S3)
-sigtabP_ch_S4$ASV = rownames(sigtabP_ch_S4)
-sigtabP_ch_S5$ASV = rownames(sigtabP_ch_S5)
-sigtabP_ch_S6$ASV = rownames(sigtabP_ch_S6)
-
-#root vs root
-sigtabP_ch_R1$ASV = rownames(sigtabP_ch_R1)
-sigtabP_ch_R2$ASV = rownames(sigtabP_ch_R2)
-sigtabP_ch_R3$ASV = rownames(sigtabP_ch_R3)
-
-#soil vs root
-sigtabP_ch_SR1$ASV = rownames(sigtabP_ch_SR1)
-sigtabP_ch_SR2$ASV = rownames(sigtabP_ch_SR2)
-sigtabP_ch_SR3$ASV = rownames(sigtabP_ch_SR3)
-sigtabP_ch_SR4$ASV = rownames(sigtabP_ch_SR4)
-sigtabP_ch_SR5$ASV = rownames(sigtabP_ch_SR5)
-sigtabP_ch_SR6$ASV = rownames(sigtabP_ch_SR6)
-sigtabP_ch_SR7$ASV = rownames(sigtabP_ch_SR7)
-sigtabP_ch_SR8$ASV = rownames(sigtabP_ch_SR8)
-sigtabP_ch_SR9$ASV = rownames(sigtabP_ch_SR9)
-sigtabP_ch_SR10$ASV = rownames(sigtabP_ch_SR10)
-sigtabP_ch_SR11$ASV = rownames(sigtabP_ch_SR11)
-sigtabP_ch_SR12$ASV = rownames(sigtabP_ch_SR12)
-
-#P_tamarugo
-#soil vs soil
-sigtabP_ta_S1$ASV = rownames(sigtabP_ta_S1)
-sigtabP_ta_S2$ASV = rownames(sigtabP_ta_S2)
-sigtabP_ta_S3$ASV = rownames(sigtabP_ta_S3)
-sigtabP_ta_S4$ASV = rownames(sigtabP_ta_S4)
-sigtabP_ta_S5$ASV = rownames(sigtabP_ta_S5)
-sigtabP_ta_S6$ASV = rownames(sigtabP_ta_S6)
-
-#root vs root
-sigtabP_ta_R1$ASV = rownames(sigtabP_ta_R1)
-sigtabP_ta_R2$ASV = rownames(sigtabP_ta_R2)
-sigtabP_ta_R3$ASV = rownames(sigtabP_ta_R3)
-
-#soil vs root
-sigtabP_ta_SR1$ASV = rownames(sigtabP_ta_SR1)
-sigtabP_ta_SR2$ASV = rownames(sigtabP_ta_SR2)
-sigtabP_ta_SR3$ASV = rownames(sigtabP_ta_SR3)
-sigtabP_ta_SR4$ASV = rownames(sigtabP_ta_SR4)
-sigtabP_ta_SR5$ASV = rownames(sigtabP_ta_SR5)
-sigtabP_ta_SR6$ASV = rownames(sigtabP_ta_SR6)
-sigtabP_ta_SR7$ASV = rownames(sigtabP_ta_SR7)
-sigtabP_ta_SR8$ASV = rownames(sigtabP_ta_SR8)
-sigtabP_ta_SR9$ASV = rownames(sigtabP_ta_SR9)
-sigtabP_ta_SR10$ASV = rownames(sigtabP_ta_SR10)
-sigtabP_ta_SR11$ASV = rownames(sigtabP_ta_SR11)
-sigtabP_ta_SR12$ASV = rownames(sigtabP_ta_SR12)
-```
-
-Heatmap colour setting
-```{r echo= FALSE}
-phy_norm <- transform_sample_counts(phy_obj_Fungi,function(x) x/sum(x))
-
-sample_data(phy_norm)[,"Specie_sample"] <- paste(sample_data(phy_norm)$Specie,sample_data(phy_norm)$Sample,sample_data(phy_norm)$Soil, sep="-")
-
-phy_mrg <- merge_samples(phy_norm, group = "Specie_sample", fun = "mean")
-max(t(otu_table(phy_mrg)))
-
-bk = c(seq(0.0,0.584,length=240),seq(0.585,1.168,length=65),seq(1.169,1.752,length=65),seq(1.753,2.336,length=65),seq(2.337,2.92,length=65))
-colors = colorRampPalette(c("blue","goldenrod1","orange","orangered", "darkred"))(length(bk)-1)
-```
-
-```{r}
-col_ann = data.frame(
-  Specie=factor(c("P_chilensis","P_chilensis","P_chilensis",
-                  "P_chilensis","P_chilensis","P_chilensis","P_chilensis",
-                  "P_tamarugo","P_tamarugo","P_tamarugo",
-                  "P_tamarugo","P_tamarugo","P_tamarugo","P_tamarugo")),
-  Sample=factor(c("Root","Root","Root",
-                     "Soil","Soil", "Soil","Soil",
-                     "Root","Root","Root",
-                     "Soil","Soil", "Soil","Soil")),
-  Soil=factor(c("La_Serena","Los_Angeles","Vicuna",
-                "La_Serena","Los_Angeles","Vicuna","Pozo_Almonte",
-                "La_Serena","Los_Angeles","Vicuna",
-                "La_Serena","Los_Angeles","Vicuna","Pozo_Almonte"))
-)
-
-
-rownames(col_ann) = rownames(sample_data(phy_mrg))
-
-pal = list(Soil =c("Pozo_Almonte" = "brown",
-                   "La_Serena" ="gold",
-                   "Vicuna" = "darkgoldenrod3",
-                   "Los_Angeles" = "darkorange"))
-```
-
-### P_chilensis
-```{r echo= FALSE}
-sigtab_Pch <- join_all(list(sigtabP_ch_S1,sigtabP_ch_S2,sigtabP_ch_S3,sigtabP_ch_S4,
-                        sigtabP_ch_R1,sigtabP_ch_R2,sigtabP_ch_R3,
-                        sigtabP_ch_SR1,sigtabP_ch_SR2,sigtabP_ch_SR3,sigtabP_ch_SR4,
-                        sigtabP_ch_SR5,sigtabP_ch_SR6,sigtabP_ch_SR7,sigtabP_ch_SR8,
-                        sigtabP_ch_SR9,sigtabP_ch_SR10,sigtabP_ch_SR11,sigtabP_ch_SR12), by ="ASV", type = "full")
-rownames(sigtab_Pch) <- sigtab_Pch$ASV
-dim(sigtab_Pch)
-diff_taxa <- row.names(sigtab_Pch[order(sigtab_Pch$log2FoldChange),])
-phy_diff_Pch <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(phy_diff_Pch)
-max(otu_table(phy_diff_Pch))
-```
-
-```{r}
-tax <- as.data.frame(tax_table(phy_diff_Pch))
-phy_diff_Pch <- as.data.frame(t(otu_table(phy_diff_Pch)))
-
-phy_diff_Pch[,"ASV"] <- rownames(phy_diff_Pch)
-tax[,"ASV"] <- rownames(tax)
-phy_diff_Pch <- join(phy_diff_Pch, tax, by= "ASV", type = "left")
-rownames(phy_diff_Pch) <- phy_diff_Pch$ASV
-
-hpal <- colorRampPalette(RColorBrewer::brewer.pal(9, "Reds"))(100)
-
-phy_diff_Pch <- mutate(phy_diff_Pch, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-```
-
-```{r}
-#pdf(file = "Manuscript/Plots/Deferentially_abundant_fungi_Pch.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(phy_diff_Pch[,1:7]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = hpal,
-          cexRow = .2, cexCol = .5, offsetRow = -1, 
-          tracecol = 'black', labRow = phy_diff_Pch$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Prosopis chilensis")
-
-#dev.off()
-```
-
-### P_tamarugo
-```{r echo= FALSE}
-sigtab_Pta <- join_all(list(sigtabP_ta_S1,sigtabP_ta_S2,sigtabP_ta_S3,sigtabP_ta_S4,
-                        sigtabP_ta_R1,sigtabP_ta_R2,sigtabP_ta_R3,
-                        sigtabP_ta_SR1,sigtabP_ta_SR2,sigtabP_ta_SR3,sigtabP_ta_SR4,
-                        sigtabP_ta_SR5,sigtabP_ta_SR6,sigtabP_ta_SR7,sigtabP_ta_SR8,
-                        sigtabP_ta_SR9,sigtabP_ta_SR10,sigtabP_ta_SR11,sigtabP_ta_SR12), by ="ASV", type = "full")
-rownames(sigtab_Pta) <- sigtab_Pta$ASV
-dim(sigtab_Pta)
-diff_taxa <- row.names(sigtab_Pta[order(sigtab_Pta$log2FoldChange),])
-phy_diff_Pta <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(phy_diff_Pta)
-max(otu_table(phy_diff_Pta))
-```
-
-```{r}
-tax <- as.data.frame(tax_table(phy_diff_Pta))
-phy_diff_Pta <- as.data.frame(t(otu_table(phy_diff_Pta)))
-
-phy_diff_Pta[,"ASV"] <- rownames(phy_diff_Pta)
-tax[,"ASV"] <- rownames(tax)
-phy_diff_Pta <- join(phy_diff_Pta, tax, by= "ASV", type = "left")
-rownames(phy_diff_Pta) <- phy_diff_Pta$ASV
-
-hpal <- colorRampPalette(RColorBrewer::brewer.pal(9, "Reds"))(100)
-
-phy_diff_Pta <- mutate(phy_diff_Pta, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-```
-
-```{r}
-#pdf(file = "Manuscript/Plots/Differentially_abundant_fungi_Pta.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(phy_diff_Pta[,8:14]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = hpal,
-          cexRow = .2, cexCol = .5, offsetRow = -1, 
-          tracecol = 'black', labRow = phy_diff_Pta$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Prosopis tamarugo")
-
-#dev.off()
-```
-
-### Both species
-```{r echo= FALSE}
-sigtab <- join_all(list(sigtab_Pch,sigtab_Pta), by ="ASV", type = "full")
-rownames(sigtab) <- sigtab$ASV
-dim(sigtab)
-diff_taxa <- row.names(sigtab[order(sigtab$log2FoldChange),])
-phy_diff <-  prune_taxa(diff_taxa, phy_mrg)
-ntaxa(phy_diff)
-max(otu_table(phy_diff))
-```
-
-```{r}
-tax <- as.data.frame(tax_table(phy_diff))
-phy_diff_Fungi <- as.data.frame(t(otu_table(phy_diff)))
-
-phy_diff_Fungi[,"ASV"] <- rownames(phy_diff_Fungi)
-tax[,"ASV"] <- rownames(tax)
-phy_diff_Fungi <- join(phy_diff_Fungi, tax, by= "ASV", type = "left")
-rownames(phy_diff_Fungi) <- phy_diff_Fungi$ASV
-
-hpal <- colorRampPalette(RColorBrewer::brewer.pal(9, "Reds"))(100)
-
-phy_diff_Fungi <- mutate(phy_diff_Fungi, taxo = paste(Kingdom, Phylum, Class, Order, Family, Genus, Specie, ASV, sep = "; ")) 
-```
-
-```{r}
-#pdf(file = "Manuscript/Plots/Differentially_abundant_fungi_both.pdf", height = 15, width = 15)
-heatmap.2(as.matrix(phy_diff_Fungi[,1:14]),
-          Colv=FALSE, Rowv = FALSE, dendrogram = 'none', col = hpal,
-          cexRow = .2, cexCol = .5, offsetRow = -1, 
-          tracecol = 'black', labRow = phy_diff_Fungi$taxo, margin=c(2, 8), 
-          offsetCol=0, srtCol=0, adjCol = c(0.5,1),  
-          main="Differentially abundant Fungi \n Both")
-
-#dev.off()
-```
-
-## Correlation plot
-```{r}
-corr_fungi <- faiths_div %>%
-  dplyr::select(Row.names, SR, Sample) %>%
-  filter(Sample=="Soil") %>%
-  left_join(
-    shannon_div, by = "Row.names")
-
-#Hmisc::rcorr(as.matrix(corr_fungi_2),type="spearman")
-suppressWarnings(car::scatterplotMatrix(as.matrix(corr_fungi %>% 
-  dplyr::select(SR, shannon_div, Chlorides, Phosphates, Boron, Sulphates, Carbonates, Calcium, Magnesium, Sodium)),regLine = list(method=lm,col="red")))
-
-suppressWarnings(car::scatterplotMatrix(as.matrix(corr_fungi %>% 
-  dplyr::select(SR, shannon_div,Potassium, Lithium, Copper, Iron, Manganese, Zinc, Lead)),regLine = list(method=lm,col="red")))
-
-#Hmisc::rcorr(as.matrix(corr_fungi_3),type="spearman")
-suppressWarnings(car::scatterplotMatrix(as.matrix(corr_fungi %>% dplyr::select(SR, shannon_div, Field_capacity, CFU, Organic_matter,  pH, Conductivity)),regLine = list(method=lm,col="red")))
-
-
-corr_fungi <- faiths_div %>%
-  dplyr::select(Row.names, SR, Sample) %>%
-  filter(Sample=="Root") %>%
-  left_join(
-    shannon_div, by = "Row.names")
-
-#Hmisc::rcorr(as.matrix(corr_fungi_2),type="spearman")
-suppressWarnings(car::scatterplotMatrix(as.matrix(corr_fungi %>% 
-  dplyr::select(SR, shannon_div, Shoot_height, Shoot_Water_potetial)),regLine = list(method=lm,col="red")))
-```
-
-### Prosopis chilensis
-#### Root
-```{r}
-phy_Pch <- subset_samples(phy_obj_Fungi, Specie == "P_chilensis")
-phy_Pch <- subset_samples(phy_Pch, Sample == "Root")
-
-norm_phy_obj_Pch_root_Fungi <- otu_table(phy_Pch)[rownames(otu_table(phy_Pch)) %in% phy_diff_Pch$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pch_root_Fungi),decreasing = FALSE)
-norm_phy_obj_Pch_root_Fungi <- norm_phy_obj_Pch_root_Fungi[,col_order]
-norm_phy_obj_Pch_root_Fungi <- as.data.frame(norm_phy_obj_Pch_root_Fungi)
-barplot(colSums(norm_phy_obj_Pch_root_Fungi))
-norm_phy_obj_Pch_root_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pch_root_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pch_root_Fungi))
-norm_phy_obj_Pch_root_Fungi[is.na(norm_phy_obj_Pch_root_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pch_root_Fungi),]
-norm_metadata <- norm_metadata[,8:9]
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pch_root_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pch)[,1][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pch)[,2][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,3][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,4][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,5][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,6][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,7][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],  rownames(tax_table(phy_Pch))[rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_Root_Fungi_Pch.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-#### Soil
-```{r}
-phy_Pch <- subset_samples(phy_obj_Fungi, Specie == "P_chilensis")
-phy_Pch <- subset_samples(phy_Pch, Sample == "Soil")
-
-norm_phy_obj_Pch_soil_Fungi <- otu_table(phy_Pch)[rownames(otu_table(phy_Pch)) %in% phy_diff_Pch$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pch_soil_Fungi),decreasing = FALSE)
-norm_phy_obj_Pch_soil_Fungi <- norm_phy_obj_Pch_soil_Fungi[,col_order]
-norm_phy_obj_Pch_soil_Fungi <- as.data.frame(norm_phy_obj_Pch_soil_Fungi)
-barplot(colSums(norm_phy_obj_Pch_soil_Fungi))
-norm_phy_obj_Pch_soil_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pch_soil_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pch_soil_Fungi))
-norm_phy_obj_Pch_soil_Fungi[is.na(norm_phy_obj_Pch_soil_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pch_soil_Fungi),]
-norm_metadata <- norm_metadata[,10:29]
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pch_soil_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pch)[,1][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pch)[,2][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,3][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,4][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,5][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,6][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,7][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],  rownames(tax_table(phy_Pch))[rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_soil_Fungi_Pch.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-#### Soil and Root
-```{r}
-phy_Pch <- subset_samples(phy_obj, Specie == "P_chilensis")
-
-norm_phy_obj_Pch_Fungi <- otu_table(phy_Pch)[rownames(otu_table(phy_Pch)) %in% phy_diff_Pch$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pch_Fungi),decreasing = FALSE)
-norm_phy_obj_Pch_Fungi <- norm_phy_obj_Pch_Fungi[,col_order]
-norm_phy_obj_Pch_Fungi <- as.data.frame(norm_phy_obj_Pch_Fungi)
-barplot(colSums(norm_phy_obj_Pch_Fungi))
-norm_phy_obj_Pch_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pch_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pch_Fungi))
-norm_phy_obj_Pch_Fungi[is.na(norm_phy_obj_Pch_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pch_Fungi),]
-norm_metadata <- norm_metadata[,8:29]
-norm_metadata[is.na(norm_metadata)] <- 0
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pch_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pch)[,1][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pch)[,2][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,3][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,4][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pch)[,5][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,6][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pch)[,7][rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr),], rownames(tax_table(phy_Pch))[rownames(otu_table(phy_Pch)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_Fungi_Pch.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-### Prosopis tamarugo
-#### Root
-```{r}
-phy_Pta <- subset_samples(phy_obj, Specie == "P_tamarugo")
-phy_Pta <- subset_samples(phy_Pta, Sample == "Root")
-
-norm_phy_obj_Pta_root_Fungi <- otu_table(phy_Pta)[rownames(otu_table(phy_Pta)) %in% phy_diff_Pta$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pta_root_Fungi),decreasing = FALSE)
-norm_phy_obj_Pta_root_Fungi <- norm_phy_obj_Pta_root_Fungi[,col_order]
-norm_phy_obj_Pta_root_Fungi <- as.data.frame(norm_phy_obj_Pta_root_Fungi)
-barplot(colSums(norm_phy_obj_Pta_root_Fungi))
-norm_phy_obj_Pta_root_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pta_root_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pta_root_Fungi))
-norm_phy_obj_Pta_root_Fungi[is.na(norm_phy_obj_Pta_root_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pta_root_Fungi),]
-norm_metadata <- norm_metadata[,8:9]
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pta_root_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pta)[,1][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pta)[,2][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,3][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,4][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,5][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,6][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,7][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),], rownames(tax_table(phy_Pta))[rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_Root_Fungi_Pta.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-#### Soil
-```{r}
-phy_Pta <- subset_samples(phy_obj, Specie == "P_tamarugo")
-phy_Pta <- subset_samples(phy_Pta, Sample == "Soil")
-
-norm_phy_obj_Pta_soil_Fungi <- otu_table(phy_Pta)[rownames(otu_table(phy_Pta)) %in% phy_diff_Pta$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pta_soil_Fungi),decreasing = FALSE)
-norm_phy_obj_Pta_soil_Fungi <- norm_phy_obj_Pta_soil_Fungi[,col_order]
-norm_phy_obj_Pta_soil_Fungi <- as.data.frame(norm_phy_obj_Pta_soil_Fungi)
-barplot(colSums(norm_phy_obj_Pta_soil_Fungi))
-norm_phy_obj_Pta_soil_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pta_soil_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pta_soil_Fungi))
-norm_phy_obj_Pta_soil_Fungi[is.na(norm_phy_obj_Pta_soil_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pta_soil_Fungi),]
-norm_metadata <- norm_metadata[,10:29]
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pta_soil_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pta)[,1][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pta)[,2][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,3][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,4][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,5][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,6][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,7][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),], rownames(tax_table(phy_Pta))[rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_soil_Fungi_Pta.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-#### Soil and Roots
-```{r}
-phy_Pta <- subset_samples(phy_obj, Specie == "P_tamarugo")
-
-norm_phy_obj_Pta_Fungi <- otu_table(phy_Pta)[rownames(otu_table(phy_Pta)) %in% phy_diff_Pta$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Pta_Fungi),decreasing = FALSE)
-norm_phy_obj_Pta_Fungi <- norm_phy_obj_Pta_Fungi[,col_order]
-norm_phy_obj_Pta_Fungi <- as.data.frame(norm_phy_obj_Pta_Fungi)
-barplot(colSums(norm_phy_obj_Pta_Fungi))
-norm_phy_obj_Pta_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Pta_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Pta_Fungi))
-norm_phy_obj_Pta_Fungi[is.na(norm_phy_obj_Pta_Fungi)] <- 0
-
-norm_metadata <- metadata[rownames(metadata) %in% colnames(norm_phy_obj_Pta_Fungi),]
-norm_metadata <- norm_metadata[,8:29]
-norm_metadata[is.na(norm_metadata)] <- 0
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Pta_Fungi), norm_metadata, method = "spearman")
-phy_obj_metadata_corr <- as.data.frame(phy_obj_metadata_corr) %>% drop_na()
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_Pta)[,1][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_Pta)[,2][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,3][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,4][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_Pta)[,5][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,6][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_Pta)[,7][rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr),], rownames(tax_table(phy_Pta))[rownames(otu_table(phy_Pta)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_Fungi_Pta.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
-
-### Both
-```{r}
-norm_phy_obj_Fungi <- otu_table(phy_obj_Fungi)[rownames(otu_table(phy_obj_Fungi)) %in% phy_diff_Fungi$ASV,]
-col_order <- sort(colnames(norm_phy_obj_Fungi),decreasing = FALSE)
-norm_phy_obj_Fungi <- norm_phy_obj_Fungi[,col_order]
-norm_phy_obj_Fungi <- as.data.frame(norm_phy_obj_Fungi)
-barplot(colSums(norm_phy_obj_Fungi))
-norm_phy_obj_Fungi <- clusterSim::data.Normalization(norm_phy_obj_Fungi, type = "n10", normalization = "column")
-barplot(colSums(norm_phy_obj_Fungi))
-norm_phy_obj_Fungi[is.na(norm_phy_obj_Fungi)] <- 0
-
-colnames(norm_phy_obj_Fungi)
-rownames(norm_metadata)
-
-norm_metadata <- sample_data(phy_obj_Fungi)[rownames(sample_data(phy_obj_Fungi)) %in% colnames(norm_phy_obj_Fungi),]
-norm_metadata <- norm_metadata[,8:29]
-norm_metadata[is.na(norm_metadata)] <- 0
-barplot(rowSums(norm_metadata))
-norm_metadata <- clusterSim::data.Normalization(norm_metadata, type = "n10", normalization = "row")
-barplot(rowSums(norm_metadata))
-norm_metadata[is.na(norm_metadata)] <- 0
-
-phy_obj_metadata_corr = cor(t(norm_phy_obj_Fungi[order(rowSums(norm_phy_obj_Fungi),decreasing = TRUE),])[,1:100], norm_metadata, method = "spearman")
-
-phy_obj_metadata_corr <- na.omit(phy_obj_metadata_corr)
-
-rownames(phy_obj_metadata_corr) <- paste(tax_table(phy_obj_Fungi)[,1][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                      tax_table(phy_obj_Fungi)[,2][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_obj_Fungi)[,3][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_obj_Fungi)[,4][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                       tax_table(phy_obj_Fungi)[,5][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_obj_Fungi)[,6][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),],                                        tax_table(phy_obj_Fungi)[,7][rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr),], rownames(tax_table(phy_obj_Fungi))[rownames(otu_table(phy_obj_Fungi)) %in% rownames(phy_obj_metadata_corr)], sep = ", ")
-```
-
-```{r}
-#pdf("Manuscript/Plots/Correlation_Fungi.pdf", height = 14, width = 15)
-heatmap.obj.tax.path.top = Heatmap(phy_obj_metadata_corr,
-                                   name = "Comparison Top Taxa to Top Pathways",
-                                   col=colorRamp2(c(-1,0,1),c("darkblue","white","darkred")),
-                                   show_row_dend = FALSE,
-                                   show_column_dend = FALSE,
-                                   show_column_names=TRUE,
-                                   column_names_side = "bottom",
-                                   show_row_names=TRUE,
-                                   row_names_side = "left",
-                                   column_names_gp = gpar(fontsize = 8),
-                                   row_names_gp = gpar(fontsize = 9),
-                                   #row_title="Top 25 Species",
-                                   #row_title_side = "right",
-                                   #column_title="DNA pathways",
-                                   column_title_side = "top",
-                                   column_title_gp = gpar(fontsize = 10),
-                                   clustering_distance_rows = "euclidean",
-                                   clustering_method_rows = "average",
-                                   clustering_distance_columns = "euclidean",
-                                   clustering_method_columns = "average",
-                                   heatmap_legend_param = list(at = c(-1,0,1),
-                                                               color_bar = "continuous",
-                                                               legend_direction="horizontal",
-                                                               labels_gp = gpar(fontsize = 12),
-                                                               legend_width = unit(4, "cm"),
-                                                               title_position = "topcenter",
-                                                               title = "Spearman correlation"),
-                                   show_heatmap_legend = TRUE,
-                                   width = unit(10, "cm")
-)
-draw(heatmap.obj.tax.path.top,
-     heatmap_legend_side = "bottom",
-     row_title="Differentially abundant taxa",
-     row_title_side="right",
-     column_title = "Seedling growth",
-     column_title_side = "bottom",
-     column_title_gp = gpar(fontsize = 14),
-     row_title_gp = gpar(fontsize = 14)
-)
-#dev.off()
-```
 
 #Bacterial metagenonics
 ## Amplicon sequencing analysis
@@ -2201,14 +878,14 @@ The amplicon sequencing analysis was made using qiime2 for pre-processing and ph
 phyloseq object preparation
 ```{r}
 # ASV table
-ASVs <- read.table("Amplicon/16S/table_16S.txt", sep="\t", header=TRUE, row.names=1)
+ASVs <- read.table("16S/table_16S.txt", sep="\t", header=TRUE, row.names=1)
 # taxonomy
-taxonomy <- read.table("Amplicon/16S/taxonomy.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"))
+taxonomy <- read.table("16S/taxonomy.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"))
 taxonomy <- as.matrix(taxonomy)
 # tree
-tree <- read_tree("Amplicon/16S/tree.nwk")
+tree <- read_tree("16S/tree.nwk")
 # sample data
-metadata <- read.table("Amplicon/16S/metadata.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"),dec = ",")
+metadata <- read.table("16S/metadata.tsv", sep="\t", header=TRUE, row.names=1, na.strings=c(""," ","NA"),dec = ",")
 # phyloseq object
 phy_obj <- phyloseq(otu_table(ASVs, taxa_are_rows = TRUE), 
                     tax_table(taxonomy), sample_data(metadata),tree)
