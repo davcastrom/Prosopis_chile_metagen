@@ -1,6 +1,6 @@
 #ignore log files
-*.log
-*.Rhistory
+.log
+.Rhistory
 
 #ignoring OS created files
 .DS_Store
