@@ -1,0 +1,15 @@
+INFO [2022-03-07 16:21:48] [[1]]
+INFO [2022-03-07 16:21:48] list(P_tam_LA_hz = P_tam_LA_hz, P_chil_LA_hz = P_chil_LA_hz)
+INFO [2022-03-07 16:21:48] 
+INFO [2022-03-07 16:21:48] $filename
+INFO [2022-03-07 16:21:48] NULL
+INFO [2022-03-07 16:21:48] 
+INFO [2022-03-07 16:21:48] $col
+INFO [2022-03-07 16:21:48] c("yellowgreen", "green")
+INFO [2022-03-07 16:21:48] 
+INFO [2022-03-07 16:21:48] $margin
+INFO [2022-03-07 16:21:48] c(0.35, 0.35, 0.35, 0.35)
+INFO [2022-03-07 16:21:48] 
+INFO [2022-03-07 16:21:48] $category.names
+INFO [2022-03-07 16:21:48] c("P.tamarugo", "P.chilensis")
+INFO [2022-03-07 16:21:48] 
